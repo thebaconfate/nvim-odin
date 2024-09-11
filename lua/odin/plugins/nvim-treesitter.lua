@@ -12,6 +12,8 @@ return {
 				"javascript",
 				"typescript",
 				"scala",
+                "css",
+                "html",
 				"java",
 				"astro"
 			},
