@@ -2,7 +2,7 @@ return {
     -- nvim-metals
     "scalameta/nvim-metals",
     name = "metals",
-    ft = { "scala", "sbt", "java" },
+    ft = { "scala", "sbt" },
     dependencies = {
         "nvim-lua/plenary.nvim",
     },
@@ -25,7 +25,7 @@ return {
 
         local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
         vim.api.nvim_create_autocmd("FileType", {
-            pattern = { "scala", "sbt", "java" },
+            pattern = { "scala", "sbt" },
             callback = function()
                 require("metals").initialize_or_attach(metals_config)
             end,
