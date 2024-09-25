@@ -1,5 +1,3 @@
-
-
 vim.o.number = true
 vim.o.relativenumber = true
 
@@ -12,8 +10,13 @@ vim.o.autoindent = true
 vim.o.smartindent = true
 vim.o.wrap = true
 
+vim.o.swapfile = false
+vim.o.backup = false
+
 vim.o.hlsearch = false
 vim.o.incsearch = true
+
+vim.opt.termguicolors = true
 
 vim.o.scrolloff = 8
 vim.o.signcolumn = "yes"
