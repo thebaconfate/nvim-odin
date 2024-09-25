@@ -33,7 +33,19 @@ return {
             handlers = {
                 function(server_name) -- default handler (optional)
                     require("lspconfig")[server_name].setup {
-                        capabilities = capabilities
+                        capabilities = capabilities,
+                        on_attach = function(client, bufnr)
+                            -- Added: Auto-format on save setup
+                            if client.server_capabilities.documentFormattingProvider then
+                                vim.api.nvim_create_autocmd("BufWritePre", {
+                                    group = vim.api.nvim_create_augroup("LspFormatting", { clear = true }),
+                                    buffer = bufnr,
+                                    callback = function()
+                                        vim.lsp.buf.format({ async = false }) -- Format before save
+                                    end,
+                                })
+                            end
+                        end,
                     }
                 end,
 
@@ -67,7 +79,25 @@ return {
                         }
                     }
                 end,
-           }
+                ["jdtls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.jdtls.setup({
+                        capabilities = capabilities,
+                        on_attach = function(client, bufnr)
+                            -- Added: Auto-format on save setup for jdtls (Java)
+                            if client.server_capabilities.documentFormattingProvider then
+                                vim.api.nvim_create_autocmd("BufWritePre", {
+                                    group = vim.api.nvim_create_augroup("LspFormatting", { clear = true }),
+                                    buffer = bufnr,
+                                    callback = function()
+                                        vim.lsp.buf.format({ async = false })
+                                    end,
+                                })
+                            end
+                        end,
+                    })
+                end,
+            }
         })
 
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
@@ -88,12 +118,11 @@ return {
                 { name = 'nvim_lsp' },
                 { name = 'luasnip' }, -- For luasnip users.
             }, {
-                { name = 'buffer' },
-            })
+                    { name = 'buffer' },
+                })
         })
 
         vim.diagnostic.config({
-            -- update_in_insert = true,
             float = {
                 focusable = false,
                 style = "minimal",
@@ -101,7 +130,19 @@ return {
                 source = "always",
                 header = "",
                 prefix = "",
+                wrap = true, -- This option wraps the diagnostic messages
+                max_width = 80, -- Set a maximum width for the diagnostic window
             },
+            -- Added: Virtual text configuration to control wrapping of warnings/errors.
+            virtual_text = {
+                spacing = 4,
+                wrap = true, -- Enable wrapping of virtual text (diagnostics in the editor view)
+                max_width = 80,
+            },
+            signs = true, -- Show signs in the gutter for diagnostics
+            update_in_insert = true, -- Update diagnostics when in insert mode
+            underline = true, -- Underline diagnostics
+            severity_sort = true,
         })
     end
 }
