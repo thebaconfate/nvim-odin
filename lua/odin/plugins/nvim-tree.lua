@@ -11,6 +11,12 @@ return {
                     quit_on_open = true,
                 },
             },
+            filters = {
+                dotfiles = false,
+                exclude = {
+                    ".env", "node_modules",
+                },
+            },
         })
     end
 }
