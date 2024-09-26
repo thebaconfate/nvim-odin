@@ -29,6 +29,9 @@ return {
                 --"rust_analyzer",
                 --"gopls",
                 "jdtls",
+                "astro",
+                "tsserver",
+                "html",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -80,6 +83,21 @@ return {
                             }
                         }
                     }
+                end,
+                ["astro"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.astro.setup {
+                        capabilities = capabilities,
+                    }
+                end,
+                ["tsserver"] = function()
+                    require("lspconfig").tsserver.setup({
+                        capabilities = capabilities,
+                        on_attach = function(client, bufnr)
+                            client.server_capabilities.documentFormattingProvider = false
+                        end,
+                        filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact", "tsx" },
+                    })
                 end,
                 ["jdtls"] = function()
                     local lspconfig = require("lspconfig")
