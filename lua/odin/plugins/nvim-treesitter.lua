@@ -11,6 +11,7 @@ return {
 				"python",
 				"javascript",
 				"typescript",
+                "tsx",
 				"scala",
                 "css",
                 "html",
