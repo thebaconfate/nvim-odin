@@ -102,23 +102,6 @@ return {
 						capabilities = capabilities,
 					})
 				end,
-				["racket_langserver"] = function()
-					require("lspconfig").racket_langserver.setup({
-						cmd = { "racket", "--lib", "racket-langserver" }, -- Command to start the server
-						capabilities = capabilities,
-						on_attach = function(client, bufnr)
-							if client.server_capabilities.documentFormattingProvider then
-								vim.api.nvim_create_autocmd("BufWritePre", {
-									group = vim.api.nvim_create_augroup("LspFormatting", { clear = true }),
-									buffer = bufnr,
-									callback = function()
-										vim.lsp.buf.format({ async = false })
-									end,
-								})
-							end
-						end,
-					})
-				end,
 			},
 		})
 
