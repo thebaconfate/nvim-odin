@@ -33,6 +33,7 @@ return {
 				"astro",
 				"ts_ls",
 				"html",
+				"yamlls",
 			},
 			handlers = {
 				function(server_name) -- default handler (optional)
@@ -100,6 +101,23 @@ return {
 					local lspconfig = require("lspconfig")
 					lspconfig.jdtls.setup({
 						capabilities = capabilities,
+					})
+				end,
+				-- YAML Language Server Setup
+				["yamlls"] = function()
+					require("lspconfig").yamlls.setup({
+						capabilities = capabilities,
+						settings = {
+							yaml = {
+								schemas = {
+									-- Add GitHub Actions schema for workflows
+									["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+								},
+								validate = true, -- Enable YAML validation
+								completion = true, -- Enable autocompletion
+								hover = true, -- Enable hover documentation
+							},
+						},
 					})
 				end,
 			},
