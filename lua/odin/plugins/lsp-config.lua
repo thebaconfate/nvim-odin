@@ -146,6 +146,7 @@ return {
 		})
 
 		vim.diagnostic.config({
+			update_in_insert = true,
 			float = {
 				focusable = false,
 				style = "minimal",
@@ -153,17 +154,7 @@ return {
 				source = "always",
 				header = "",
 				prefix = "",
-				max_width = 80, -- Set a maximum width for the diagnostic window
 			},
-			-- Added: Virtual text configuration to control wrapping of warnings/errors.
-			virtual_text = {
-				spacing = 4,
-				max_width = 80,
-			},
-			signs = true, -- Show signs in the gutter for diagnostics
-			update_in_insert = true, -- Update diagnostics when in insert mode
-			underline = true, -- Underline diagnostics
-			severity_sort = true,
 		})
 	end,
 }
