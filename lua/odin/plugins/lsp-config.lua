@@ -34,7 +34,8 @@ return {
                 "ts_ls",
                 "html",
                 "yamlls",
-                "texlab"
+                "texlab",
+                "pyright"
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -47,7 +48,18 @@ return {
                                     group = vim.api.nvim_create_augroup("LspFormatting", { clear = true }),
                                     buffer = bufnr,
                                     callback = function()
-                                        vim.lsp.buf.format({ async = false }) -- Format before save
+                                        if vim.bo.filetype == "python" then
+                                            -- Use ruff for Python files
+                                            vim.lsp.buf.format({
+                                                async = false,
+                                                filter = function(formatter)
+                                                    return formatter.name == "ruff"
+                                                end
+                                            })
+                                        else
+                                            -- Use the default formatter for other languages
+                                            vim.lsp.buf.format({ async = false })
+                                        end
                                     end,
                                 })
                             else
@@ -87,6 +99,24 @@ return {
                         },
                     })
                 end,
+
+                -- Pyright configuration for Python
+                ["pyright"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.pyright.setup({
+                        capabilities = capabilities,
+                        settings = {
+                            python = {
+                                analysis = {
+                                    typeCheckingMode = "basic", -- Type checking mode
+                                    autoSearchPaths = true,     -- Automatically search for dependencies
+                                    useLibraryCodeForTypes = true,
+                                },
+                            },
+                        },
+                    })
+                end,
+
                 ["astro"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.astro.setup({
@@ -158,6 +188,7 @@ return {
             mapping = cmp.mapping.preset.insert({
                 ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
                 ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
+                ["<Tab>"] = cmp.mapping.confirm({ select = true }),
                 ["<C-y>"] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
