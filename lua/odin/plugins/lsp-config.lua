@@ -145,11 +145,9 @@ return {
                                 schemas = {
                                     -- Add GitHub Actions schema for workflows
                                     ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
-                                    ["https://raw.githubusercontent.com/yaml/yaml-language-server/master/src/schema/kubernetes-schema.json"] =
-                                    -- Add K8s schema for kubernetes
-                                    "/**/*.yaml",
-
+                                    kubernetes = "*.yaml",
                                 },
+
                                 validate = true,   -- Enable YAML validation
                                 completion = true, -- Enable autocompletion
                                 hover = true,      -- Enable hover documentation
