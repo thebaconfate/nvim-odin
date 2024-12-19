@@ -145,7 +145,7 @@ return {
                                 schemas = {
                                     -- Add GitHub Actions schema for workflows
                                     ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
-                                    kubernetes = "*.yaml",
+                                    kubernetes = "/k8s/*.yaml",
                                 },
 
                                 validate = true,   -- Enable YAML validation
@@ -166,6 +166,7 @@ return {
                                     executable = "latexmk", -- You can change this to pdflatex, xelatex, etc.
                                     args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f" },
                                     onSave = true,          -- Auto-build on save
+                                    async = true,
                                 },
                                 viewer = {
                                     forwardSearch = true, -- Enable forward search
