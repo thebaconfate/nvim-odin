@@ -1,6 +1,7 @@
 return {
     "neovim/nvim-lspconfig",
     dependencies = {
+        "stevearc/conform.nvim",
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
         "hrsh7th/cmp-nvim-lsp",
@@ -13,6 +14,26 @@ return {
         "j-hui/fidget.nvim",
     },
     config = function()
+        require("conform").setup({
+            formatters_by_ft = {
+                lua = { "stylua" },
+                typescript = { "prettierd", "prettier", stop_after_first = true },
+                python = { "ruff_format" },
+                javascript = { "prettierd", "prettier", stop_after_first = true },
+                java = { "astyle" },
+                latex = { "latexindent" },
+                -- Conform can also run multiple formatters sequentially
+                -- python = { "isort", "black" },
+                --
+                -- You can use 'stop_after_first' to run the first available formatter from the list
+                -- javascript = { "prettierd", "prettier", stop_after_first = true },
+            },
+            default_format_opts = {
+                lsp_format = "fallback"
+            },
+            format_on_save = {
+            },
+        })
         local cmp = require("cmp")
         local cmp_lsp = require("cmp_nvim_lsp")
         local capabilities = vim.tbl_deep_extend(

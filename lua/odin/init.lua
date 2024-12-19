@@ -9,5 +9,5 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 
 vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.tex",
-    command = "silent !latexmk -pdf %"
+    command = "silent !latexmk -pdf %",
 })
