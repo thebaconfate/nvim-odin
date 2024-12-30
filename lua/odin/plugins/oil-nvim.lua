@@ -12,7 +12,14 @@ return {
             columns = { "icon" },
             view_options = {
                 show_hidden = true
-            }
+            },
+            keymaps = {
+                ["<C-p>"] = false,
+            },
+            preview = {
+                layout = "vertical",       -- Vertical split
+                vertical = { width = 40 }, -- Customize the width
+            },
         })
 
         vim.keymap.set("n", "<leader>pv", ":Oil<CR>", { desc = "Open Oil" })
