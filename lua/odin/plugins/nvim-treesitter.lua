@@ -21,7 +21,8 @@ return {
                 "yaml",
                 "dockerfile",
                 "jsdoc",
-                "vimdoc"
+                "vimdoc",
+                "racket"
             },
             sync_install = false,
             highlight = {

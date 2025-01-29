@@ -22,6 +22,8 @@ return {
                 javascript = { "prettierd", "prettier", stop_after_first = true },
                 java = { "astyle" },
                 latex = { "latexindent" },
+                c = { "clang_format" },
+                -- racket = { "raco_fmt" } -- Disable when working on R5RS or other dialects that turn brackets to square brackets
                 -- Conform can also run multiple formatters sequentially
                 -- python = { "isort", "black" },
                 --
@@ -33,6 +35,14 @@ return {
             },
             format_on_save = {
             },
+            notify_no_formatter = true,
+            formatters = {
+                raco_fmt = {
+                    command = "raco",
+                    args = { "fmt", "$FILENAME" },
+                    stdin = true,
+                }
+            }
         })
         local cmp = require("cmp")
         local cmp_lsp = require("cmp_nvim_lsp")
@@ -64,32 +74,33 @@ return {
                 function(server_name) -- default handler (optional)
                     require("lspconfig")[server_name].setup({
                         capabilities = capabilities,
-                        on_attach = function(client, bufnr)
-                            -- Added: Auto-format on save setup
-                            if client.server_capabilities.documentFormattingProvider then
-                                vim.api.nvim_create_autocmd("BufWritePre", {
-                                    group = vim.api.nvim_create_augroup("LspFormatting", { clear = true }),
-                                    buffer = bufnr,
-                                    callback = function()
-                                        if vim.bo.filetype == "python" then
-                                            -- Use ruff for Python files
-                                            vim.lsp.buf.format({
-                                                async = false,
-                                                filter = function(formatter)
-                                                    return formatter.name == "ruff"
-                                                end,
-                                            })
-                                        else
-                                            -- Use the default formatter for other languages
-                                            vim.lsp.buf.format({ async = false })
-                                        end
-                                    end,
-                                })
-                            else
-                                local message = server_name + " " + "does not support formatting"
-                                print(message)
-                            end
-                        end,
+                        -- NOTE: This part might be useless due to conform being the formatter
+                        --on_attach = function(client, bufnr)
+                        -- Added: Auto-format on save setup
+                        -- if client.server_capabilities.documentFormattingProvider then
+                        -- vim.api.nvim_create_autocmd("BufWritePre", {
+                        --   group = vim.api.nvim_create_augroup("LspFormatting", { clear = true }),
+                        -- buffer = bufnr,
+                        --callback = function()
+                        --  if vim.bo.filetype == "python" then
+                        -- Use ruff for Python files
+                        --    vim.lsp.buf.format({
+                        --      async = false,
+                        --    filter = function(formatter)
+                        --      return formatter.name == "ruff"
+                        --end,
+                        -- })
+                        -- else
+                        -- Use the default formatter for other languages
+                        --   vim.lsp.buf.format({ async = false })
+                        --end
+                        --   end,
+                        -- })
+                        --else
+                        --  local message = server_name + " " + "does not support formatting"
+                        --             print(message)
+                        -- end
+                        --end,
                     })
                 end,
 
@@ -140,17 +151,31 @@ return {
                     })
                 end,
 
+                ["html"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.html.setup({
+                        capabilities = capabilities,
+                        configurationSection = { "html", "css", "javascript" },
+                        embeddedLanguages = {
+                            css = true,
+                            javascript = true
+                        },
+                    })
+                end,
+
                 ["astro"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.astro.setup({
                         capabilities = capabilities,
                     })
                 end,
+
                 ["ts_ls"] = function()
                     require("lspconfig").ts_ls.setup({
                         capabilities = capabilities,
                     })
                 end,
+
                 ["jdtls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.jdtls.setup({
@@ -216,6 +241,26 @@ return {
                     })
                 end,
             },
+        })
+
+        local lspconfig = require("lspconfig")
+        lspconfig.racket_langserver.setup({
+            capabilities = capabilities,
+            cmd = { "racket", "-l", "racket-langserver" },
+            filetypes = { "racket" },
+            root_dir = lspconfig.util.root_pattern("*.rkt", ".git"),
+            single_file_support = true,
+            on_attach = function(client, bufnr)
+                -- Optional: Auto-format on save
+                if client.server_capabilities.documentFormattingProvider then
+                    vim.api.nvim_create_autocmd("BufWritePre", {
+                        buffer = bufnr,
+                        callback = function()
+                            vim.lsp.buf.format()
+                        end,
+                    })
+                end
+            end,
         })
 
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
