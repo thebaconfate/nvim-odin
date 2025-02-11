@@ -23,14 +23,8 @@ return {
                 java = { "astyle" },
                 latex = { "latexindent" },
                 c = { "clang_format" },
-                haskell = { "ormulu" },
-
                 -- racket = { "raco_fmt" } -- Disable when working on R5RS or other dialects that turn brackets to square brackets
-                -- Conform can also run multiple formatters sequentially
-                -- python = { "isort", "black" },
-                --
-                -- You can use 'stop_after_first' to run the first available formatter from the list
-                -- javascript = { "prettierd", "prettier", stop_after_first = true },
+                haskell = { "ormulu" },
             },
             default_format_opts = {
                 lsp_format = "fallback"
@@ -79,36 +73,10 @@ return {
                 function(server_name) -- default handler (optional)
                     require("lspconfig")[server_name].setup({
                         capabilities = capabilities,
-                        -- NOTE: This part might be useless due to conform being the formatter
-                        --on_attach = function(client, bufnr)
-                        -- Added: Auto-format on save setup
-                        -- if client.server_capabilities.documentFormattingProvider then
-                        -- vim.api.nvim_create_autocmd("BufWritePre", {
-                        --   group = vim.api.nvim_create_augroup("LspFormatting", { clear = true }),
-                        -- buffer = bufnr,
-                        --callback = function()
-                        --  if vim.bo.filetype == "python" then
-                        -- Use ruff for Python files
-                        --    vim.lsp.buf.format({
-                        --      async = false,
-                        --    filter = function(formatter)
-                        --      return formatter.name == "ruff"
-                        --end,
-                        -- })
-                        -- else
-                        -- Use the default formatter for other languages
-                        --   vim.lsp.buf.format({ async = false })
-                        --end
-                        --   end,
-                        -- })
-                        --else
-                        --  local message = server_name + " " + "does not support formatting"
-                        --             print(message)
-                        -- end
-                        --end,
                     })
                 end,
 
+                -- Config for Zig
                 zls = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.zls.setup({
@@ -124,6 +92,8 @@ return {
                     vim.g.zig_fmt_parse_errors = 0
                     vim.g.zig_fmt_autosave = 0
                 end,
+
+                -- Config for Lua
                 ["lua_ls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.lua_ls.setup({
@@ -139,7 +109,7 @@ return {
                     })
                 end,
 
-                -- Pyright configuration for Python
+                -- Configuration for Python
                 ["pyright"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.pyright.setup({
@@ -156,6 +126,7 @@ return {
                     })
                 end,
 
+                -- Configuration for HTML
                 ["html"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.html.setup({
@@ -168,6 +139,7 @@ return {
                     })
                 end,
 
+                -- Configuration for Astro
                 ["astro"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.astro.setup({
@@ -175,18 +147,22 @@ return {
                     })
                 end,
 
+
+                -- Configuration for Typescript
                 ["ts_ls"] = function()
                     require("lspconfig").ts_ls.setup({
                         capabilities = capabilities,
                     })
                 end,
 
+                -- Configuration for Java
                 ["jdtls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.jdtls.setup({
                         capabilities = capabilities,
                     })
                 end,
+
                 -- YAML Language Server Setup
                 ["yamlls"] = function()
                     require("lspconfig").yamlls.setup({
@@ -196,6 +172,7 @@ return {
                                 schemas = {
                                     -- Add GitHub Actions schema for workflows
                                     ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+                                    -- Kubernetes files will only be recognized if they're in a k8s directory. Otherwise it clashes with other yaml schemas
                                     kubernetes = "/k8s/*.yaml",
                                 },
 
@@ -207,6 +184,7 @@ return {
                     })
                 end,
 
+                -- Configuration for LaTeX
                 ["texlab"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.texlab.setup({
@@ -230,7 +208,7 @@ return {
                     })
                 end,
 
-                -- Dockerfile LSP (dockerls)
+                -- Configuration for Dockerfiles
                 ["dockerls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.dockerls.setup({
@@ -238,7 +216,7 @@ return {
                     })
                 end,
 
-                -- Compose Language Service LSP (docker_compose_language_service)
+                -- Configuration for docker_compose files
                 ["docker_compose_language_service"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.docker_compose_language_service.setup({
@@ -246,6 +224,7 @@ return {
                     })
                 end,
 
+                -- Configuration for Haskell
                 ["hls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.hls.setup({
