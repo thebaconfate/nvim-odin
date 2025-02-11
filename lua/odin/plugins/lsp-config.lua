@@ -23,6 +23,8 @@ return {
                 java = { "astyle" },
                 latex = { "latexindent" },
                 c = { "clang_format" },
+                haskell = { "ormulu" },
+
                 -- racket = { "raco_fmt" } -- Disable when working on R5RS or other dialects that turn brackets to square brackets
                 -- Conform can also run multiple formatters sequentially
                 -- python = { "isort", "black" },
@@ -71,6 +73,7 @@ return {
                 "clangd",
                 "dockerls",
                 "docker_compose_language_service",
+                "hls",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -242,6 +245,13 @@ return {
                         capabilities = capabilities,
                     })
                 end,
+
+                ["hls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.hls.setup({
+                        filetypes = { 'haskell', 'lhaskell', 'cabal' },
+                    })
+                end
             },
         })
 
