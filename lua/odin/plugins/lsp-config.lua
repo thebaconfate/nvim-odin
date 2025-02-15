@@ -25,6 +25,7 @@ return {
                 c = { "clang_format" },
                 -- racket = { "raco_fmt" } -- Disable when working on R5RS or other dialects that turn brackets to square brackets
                 haskell = { "ormulu" },
+                erlang = {}
             },
             default_format_opts = {
                 lsp_format = "fallback"
@@ -50,7 +51,12 @@ return {
         )
 
         require("fidget").setup({})
-        require("mason").setup()
+        require("mason").setup({
+            PATH = "prepend",                                -- Ensures Mason binaries are found first
+            log_level = vim.log.levels.DEBUG,
+            shell = "C:\\Program Files\\Git\\bin\\bash.exe", -- Use Git Bash
+        }
+        )
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "lua_ls",
@@ -68,6 +74,7 @@ return {
                 "dockerls",
                 "docker_compose_language_service",
                 "hls",
+                "erlangls", -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed. Simply run neovim in git bash if on windows
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -230,6 +237,11 @@ return {
                     lspconfig.hls.setup({
                         filetypes = { 'haskell', 'lhaskell', 'cabal' },
                     })
+                end,
+
+                ["erlangls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.erlangls.setup({})
                 end
             },
         })

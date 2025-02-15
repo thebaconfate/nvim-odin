@@ -22,7 +22,9 @@ return {
                 "dockerfile",
                 "jsdoc",
                 "vimdoc",
-                "racket"
+                "racket",
+                "haskell",
+                "erlang"
             },
             sync_install = false,
             highlight = {
