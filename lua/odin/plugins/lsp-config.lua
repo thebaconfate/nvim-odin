@@ -20,6 +20,8 @@ return {
                 typescript = { "prettierd", "prettier", stop_after_first = true },
                 python = { "ruff_format" },
                 javascript = { "prettierd", "prettier", stop_after_first = true },
+                css = { "prettierd", "prettier", stop_after_first = true },
+                html = { "prettierd", "prettier", stop_after_first = true },
                 java = { "astyle" },
                 latex = { "latexindent" },
                 c = { "clang_format" },
