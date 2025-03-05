@@ -22,8 +22,7 @@ vim.o.scrolloff = 8
 vim.o.signcolumn = "yes"
 
 vim.o.updatetime = 50
-vim.o.colorcolumn = "80"
+vim.o.textwidth = 80
 
 vim.g.mapleader = ' '
-vim.g.maplocalleader ='\\'
-
+vim.g.maplocalleader = '\\'
