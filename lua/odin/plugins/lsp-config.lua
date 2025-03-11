@@ -14,15 +14,17 @@ return {
         "j-hui/fidget.nvim",
     },
     config = function()
+        local prettier_config = { "prettierd", "prettier", stop_after_first = true }
         require("conform").setup({
             formatters_by_ft = {
                 lua = { "stylua" },
-                typescript = { "prettierd", "prettier", stop_after_first = true },
+                typescript = prettier_config,
                 python = { "ruff_format" },
-                javascript = { "prettierd", "prettier", stop_after_first = true },
-                astro = { "prettierd", "prettier", stop_after_first = true },
-                css = { "prettierd", "prettier", stop_after_first = true },
-                html = { "prettierd", "prettier", stop_after_first = true },
+                javascript = prettier_config,
+                astro = prettier_config,
+                css = prettier_config,
+                html = prettier_config,
+                markdown = prettier_config,
                 java = { "astyle" },
                 latex = { "latexindent" },
                 c = { "clang_format" },
