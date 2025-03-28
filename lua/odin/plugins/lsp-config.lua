@@ -55,13 +55,24 @@ return {
             cmp_lsp.default_capabilities()
         )
 
+        local function get_shell()
+            local sys_bash = "C:\\windows\\system32\\bash.exe"
+            local git_bash = "C:\\Program Files\\Git\\bin\\bash.exe" -- Use Git Bash
+            if vim.loop.fs_stat(sys_bash) then
+                return sys_bash
+            elseif vim.loop.fs_stat(git_bash) then
+                return git_bash
+            else
+                return nil
+            end
+        end
         require("fidget").setup({})
         require("mason").setup({
-            PATH = "prepend",                                -- Ensures Mason binaries are found first
+            PATH = "prepend", -- Ensures Mason binaries are found first
             log_level = vim.log.levels.DEBUG,
-            shell = "C:\\Program Files\\Git\\bin\\bash.exe", -- Use Git Bash
-        }
-        )
+            shell = get_shell()
+
+        })
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "lua_ls",
@@ -198,6 +209,10 @@ return {
 
                 -- Configuration for LaTeX
                 ["texlab"] = function()
+                    -- requires latexmk command to be available
+                    -- You could install miktex and then the latexmk package
+                    -- You also have to add the miktex binaries to path so the
+                    -- latexmk executable is on the path
                     local lspconfig = require("lspconfig")
                     lspconfig.texlab.setup({
                         capabilities = capabilities,
