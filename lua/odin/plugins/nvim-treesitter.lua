@@ -24,7 +24,7 @@ return {
                 "vimdoc",
                 "racket",
                 "haskell",
-                "erlang"
+                "erlang",
             },
             sync_install = false,
             highlight = {
