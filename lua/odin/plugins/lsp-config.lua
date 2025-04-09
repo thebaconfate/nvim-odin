@@ -30,7 +30,7 @@ return {
                 c = { "clang_format" },
                 -- racket = { "raco_fmt" } -- Disable when working on R5RS or other dialects that turn brackets to square brackets
                 haskell = { "ormulu" },
-                erlang = {}
+                erlang = { "erlfmt" }
             },
             default_format_opts = {
                 lsp_format = "fallback"
@@ -90,7 +90,10 @@ return {
                 "dockerls",
                 "docker_compose_language_service",
                 "hls",
-                "erlangls", -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed. Simply run neovim in git bash if on windows
+                "erlangls",
+                -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed.
+                -- Simply run neovim in git bash or wsl bash if on windows
+                "opencl_ls"
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -259,9 +262,16 @@ return {
                     })
                 end,
 
+                -- Configuration for Erlang
                 ["erlangls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.erlangls.setup({})
+                end,
+
+                -- Configuration for OpenCL
+                ["opencl_ls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.opencl_ls.setup({})
                 end
             },
         })
