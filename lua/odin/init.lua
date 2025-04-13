@@ -11,3 +11,9 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.tex",
     command = "silent !latexmk -pdf %",
 })
+
+vim.filetype.add({
+    extension = {
+        cl = "opencl",
+    },
+})
