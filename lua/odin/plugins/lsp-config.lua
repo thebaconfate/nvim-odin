@@ -90,10 +90,11 @@ return {
                 "dockerls",
                 "docker_compose_language_service",
                 "hls",
-                "erlangls",
+                -- "erlangls", -- last used in April 2025
                 -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed.
                 -- Simply run neovim in git bash or wsl bash if on windows
-                "opencl_ls"
+                -- "opencl_ls", -- last used in May 2025
+                "clojure_lsp", -- run this in WSL or linux.
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -272,6 +273,15 @@ return {
                 ["opencl_ls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.opencl_ls.setup({})
+                end,
+                ["clojure_ls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.clojure_ls.setup({
+                        cmd = { 'clojure-lsp' },
+                        filetypes = { 'clojure', 'edn' },
+                        root_dir = require('lspconfig.util').root_pattern('project.clj', 'deps.edn', 'build.boot',
+                            'shadow-cljs.edn', '.git'),
+                    })
                 end
             },
         })
