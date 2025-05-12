@@ -1,14 +1,15 @@
 return {
-    'nvim-telescope/telescope.nvim', tag = '0.1.8',
+    'nvim-telescope/telescope.nvim',
+    tag = '0.1.8',
     -- or                              , branch = '0.1.x',
     dependencies = {
-        'nvim-lua/plenary.nvim',             -- Required dependency
-        'nvim-treesitter/nvim-treesitter',   -- Optional for better previewing
-        'nvim-web-devicons',                 -- Optional for file icons
-        'sharkdp/fd',                        -- Optional for faster file searching
-        'neovim/nvim-lspconfig',             -- Optional for LSP integration }
+        'nvim-lua/plenary.nvim',           -- Required dependency
+        'nvim-treesitter/nvim-treesitter', -- Optional for better previewing
+        'nvim-web-devicons',               -- Optional for file icons
+        'sharkdp/fd',                      -- Optional for faster file searching
+        'neovim/nvim-lspconfig',           -- Optional for LSP integration }
     },
-    config = function ()
+    config = function()
         require('telescope').setup({})
         local builtin = require('telescope.builtin')
         vim.keymap.set('n', '<leader>pf', builtin.find_files, {})
