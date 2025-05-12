@@ -17,7 +17,7 @@ return {
         }
         metals_config.init_options.statusBarProvider = "off"
         metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
-        metals_config.on_attach = function(client, bufnr)
+        metals_config.on_attach = function(_, _)
         end
         return metals_config
     end,

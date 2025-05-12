@@ -19,9 +19,9 @@ return {
         local function get_shell()
             local sys_bash = "C:\\windows\\system32\\bash.exe"
             local git_bash = "C:\\Program Files\\Git\\bin\\bash.exe" -- Use Git Bash
-            if vim.loop.fs_stat(sys_bash) then
+            if vim.uv.fs_stat(sys_bash) then
                 return sys_bash
-            elseif vim.loop.fs_stat(git_bash) then
+            elseif vim.uv.fs_stat(git_bash) then
                 return git_bash
             else
                 return nil
@@ -56,12 +56,23 @@ return {
 
             -- "opencl_ls"
         }
+        local function load_server_config(server)
+            local config_path = "odin.lsps." .. server
+            local success, config = pcall(require, config_path)
+
+            if success then
+                return config
+            else
+                -- Fallback to default config if no custom config is found
+                return {}
+            end
+        end
         require("mason-lspconfig").setup({
             ensure_installed = servers,
         })
 
         for _, server in ipairs(servers) do
-            vim.lsp.config(server, {})
+            vim.lsp.config(server, load_server_config(server))
             vim.lsp.enable(server)
         end
 
@@ -97,7 +108,7 @@ return {
                 focusable = false,
                 style = "minimal",
                 border = "rounded",
-                source = "always",
+                source = true,
                 header = "",
                 prefix = "",
             },

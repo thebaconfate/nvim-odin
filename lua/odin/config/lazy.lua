@@ -33,7 +33,7 @@ require("lazy").setup({
 vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(ev)
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
-        if client:supports_method('textDocument/completion') then
+        if client ~= nil and client:supports_method('textDocument/completion') then
             vim.lsp.completion.enable(true, client.id, ev.buf, { autoTrigger = true })
         end
         local opts = {
@@ -67,10 +67,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
             vim.lsp.buf.signature_help()
         end, opts)
         vim.keymap.set("n", "nd", function()
-            vim.diagnostic.goto_next()
+            vim.diagnostic.jump({ count = 1, float = true })
         end, opts)
         vim.keymap.set("n", "Nd", function()
-            vim.diagnostic.goto_prev()
+            vim.diagnostic.jump({ count = -1, float = true })
         end, opts)
     end,
 })
