@@ -23,8 +23,8 @@ return {
                 "jsdoc",
                 "vimdoc",
                 "racket",
-                "haskell",
-                "erlang",
+                -- "haskell",
+                -- "erlang",
             },
             sync_install = false,
             highlight = {
