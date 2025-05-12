@@ -272,6 +272,11 @@ return {
                 ["opencl_ls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.opencl_ls.setup({})
+                end,
+
+                ["clojure_ls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.clojure_ls.setup({})
                 end
             },
         })
