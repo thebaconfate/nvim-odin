@@ -31,9 +31,13 @@ require("lazy").setup({
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {
-    callback = function(e)
+    callback = function(ev)
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        if client:supports_method('textDocument/completion') then
+            vim.lsp.completion.enable(true, client.id, ev.buf, { autoTrigger = true })
+        end
         local opts = {
-            buffer = e.buf,
+            buffer = ev.buf,
         }
         vim.keymap.set("n", "gd", function()
             vim.lsp.buf.definition()
