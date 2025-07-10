@@ -7,8 +7,10 @@ return {
             formatters_by_ft = {
                 lua = { "stylua" },
                 typescript = prettier_config,
-                python = { "ruff_format" },
+                tyescriptreact = prettier_config,
                 javascript = prettier_config,
+                javascriptreact = prettier_config,
+                python = { "ruff_format" },
                 astro = prettier_config,
                 css = prettier_config,
                 html = prettier_config,
@@ -17,7 +19,7 @@ return {
                 latex = { "latexindent" },
                 c = { "clang_format" },
                 -- racket = { "raco_fmt" } -- Disable when working on R5RS or other dialects that turn brackets to square brackets
-                haskell = { "ormulu" },
+                haskell = { "ormolu" },
                 erlang = { "erlfmt" },
                 clojure = { "cljfmt" }
             },
