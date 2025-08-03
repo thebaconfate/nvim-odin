@@ -7,7 +7,7 @@ return {
             formatters_by_ft = {
                 lua = { "stylua" },
                 typescript = prettier_config,
-                tyescriptreact = prettier_config,
+                typescriptreact = prettier_config,
                 javascript = prettier_config,
                 javascriptreact = prettier_config,
                 python = { "ruff_format" },
