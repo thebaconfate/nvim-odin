@@ -3,7 +3,7 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate", -- Automatically update parsers
     config = function()
-        require("nvim-treesitter.configs").setup({
+        require("nvim-treesitter.config").setup({
             ensure_installed = {
                 -- Specify the languages you want
                 "c",
