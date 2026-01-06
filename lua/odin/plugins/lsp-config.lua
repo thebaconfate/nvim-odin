@@ -36,8 +36,6 @@ return {
         })
         local servers = {
             "lua_ls",
-            --"rust_analyzer",
-            --"gopls",
             "jdtls",
             "astro",
             "ts_ls",
@@ -46,15 +44,17 @@ return {
             "yamlls",
             "texlab",
             "pyright",
-            "clangd",
             "dockerls",
             "docker_compose_language_service",
             "jsonls",
-            -- "hls",
             -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed.
             -- Simply run neovim in git bash or wsl bash if on windows
-            -- "erlangls",
             --
+            -- "clangd",
+            -- "rust_analyzer",
+            -- "gopls",
+            -- "hls",
+            -- "erlangls",
             -- "opencl_ls"
         }
         local function load_server_config(server)
