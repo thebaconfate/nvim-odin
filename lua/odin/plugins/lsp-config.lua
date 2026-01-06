@@ -77,11 +77,9 @@ return {
             local success, config = pcall(require, config_path)
 
             if success then
-                print("Config " .. server .. " loading succesfully")
                 return config
             else
                 -- Fallback to default config if no custom config is found
-                print("Config " .. server .. " not loading succesfully, using default")
                 return {}
             end
         end
