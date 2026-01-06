@@ -16,12 +16,19 @@ return {
     config = function()
         local cmp = require("cmp")
 
+        local function file_exists(path)
+            return vim.fn.filereadable(path) == 1
+        end
+
         local function get_shell()
-            local sys_bash = "C:\\windows\\system32\\bash.exe"
+            if vim.fn.has("win32") == 0 then
+                return vim.env.SHELL or "/bin/bash"
+            end
+            local sys_bash = "C:\\windows\\system32\\bash.exe"       -- WSL bash
             local git_bash = "C:\\Program Files\\Git\\bin\\bash.exe" -- Use Git Bash
-            if vim.uv.fs_stat(sys_bash) then
+            if file_exists(sys_bash) then
                 return sys_bash
-            elseif vim.uv.fs_stat(git_bash) then
+            elseif file_exists(git_bash) then
                 return git_bash
             else
                 return nil
