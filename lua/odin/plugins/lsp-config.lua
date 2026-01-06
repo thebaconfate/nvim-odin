@@ -73,13 +73,15 @@ return {
             -- "opencl_ls"
         }
         local function load_server_config(server)
-            local config_path = "odin.lsps." .. server
+            local config_path = "odin.lsp." .. server
             local success, config = pcall(require, config_path)
 
             if success then
+                print("Config " .. server .. " loading succesfully")
                 return config
             else
                 -- Fallback to default config if no custom config is found
+                print("Config " .. server .. " not loading succesfully, using default")
                 return {}
             end
         end
