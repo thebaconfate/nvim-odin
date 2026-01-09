@@ -24,11 +24,8 @@ return {
             if vim.fn.has("win32") == 0 then
                 return vim.env.SHELL or "/bin/bash"
             end
-            local wsl_bash = "C:\\windows\\system32\\bash.exe"       -- WSL bash
             local git_bash = "C:\\Program Files\\Git\\bin\\bash.exe" -- Use Git Bash
-            if file_exists(wsl_bash) then
-                return wsl_bash
-            elseif file_exists(git_bash) then
+            if file_exists(git_bash) then
                 vim.notify(
                     "No WSL bash found, using git bash instead. Consider installing wsl for future use",
                     vim.log.levels.WARN
