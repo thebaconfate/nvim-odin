@@ -22,23 +22,25 @@ return {
 
         local function get_shell()
             if vim.fn.has("win32") == 0 then
+                -- Native linux, return the shell
                 return vim.env.SHELL or "/bin/bash"
             end
             local git_bash = "C:\\Program Files\\Git\\bin\\bash.exe" -- Use Git Bash
-            if file_exists(git_bash) then
-                vim.notify(
-                    "No WSL bash found, using git bash instead. Consider installing wsl for future use",
-                    vim.log.levels.WARN
-                )
+            local wingw64 = "C:\\msys64\\mingw64.exe"
+            if file_exists(wingw64) then
+                return wingw64
+            elseif file_exists(git_bash) then
+                vim.notify("No msys64 found, defaulting to git bash as shell. Please install msys64 for future use")
                 return git_bash
             else
                 vim.notify(
-                    "No WSL or Git Bash found! Some features may not work.",
+                    "No Bash found! Some features may not work.",
                     vim.log.levels.WARN
                 )
                 return nil
             end
         end
+
         require("fidget").setup({})
         require("mason").setup({
             PATH = "prepend", -- Ensures Mason binaries are found first
