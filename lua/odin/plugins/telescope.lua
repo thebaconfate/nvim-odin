@@ -5,7 +5,8 @@ end
 local function get_shell()
     if vim.fn.has("win32") == 0 then
         -- Native linux, return the shell
-        return vim.env.SHELL or "/bin/bash"
+        vim.notify("Native linux, using native bash")
+        return (vim.env.SHELL or "/bin/bash") .. " -c"
     end
     local git_bash = "C:\\Program Files\\Git\\bin\\bash.exe" -- Use Git Bash
     local wingw64 = "C:\\msys64\\mingw64.exe"
