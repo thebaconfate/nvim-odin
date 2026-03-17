@@ -61,6 +61,7 @@ return {
             "dockerls",
             "docker_compose_language_service",
             "jsonls",
+            "bashls"
             -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed.
             -- Simply run neovim in git bash or wsl bash if on windows
             --
