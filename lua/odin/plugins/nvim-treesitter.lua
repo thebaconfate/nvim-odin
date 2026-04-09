@@ -11,33 +11,16 @@ return {
             install_dir = vim.fn.stdpath("data") .. "/site",
         })
 
-        -- install languages
-        local ensure_installed = {
-            -- Specify the languages you want
+        -- These come pre installed with neovim
+        local pre_installed = {
             "c",
             "lua",
-            "python",
-            "javascript",
-            "typescript",
-            "tsx",
-            "scala",
-            "css",
-            "html",
-            "java",
-            "astro",
-            "latex",
-            "yaml",
-            "dockerfile",
-            "jsdoc",
+            "markdown",
+            "markdown_inline",
+            "query",
+            "vim",
             "vimdoc",
-            "racket",
-            -- "haskell",
-            -- "erlang",
-            "elixir",
-            "heex"
         }
-
-        treesitter.install(ensure_installed)
 
         -- From https://github.com/nvim-treesitter/nvim-treesitter/issues/8221#issuecomment-3436658280
         vim.api.nvim_create_autocmd("FileType", {
@@ -45,7 +28,7 @@ return {
                 local lang = vim.treesitter.language.get_lang(args.match)
                 if vim.list_contains(treesitter.get_available(), lang) then
                     if not vim.list_contains(treesitter.get_installed(), lang)
-                        and not vim.list_contains(ensure_installed, lang)
+                        and not vim.list_contains(pre_installed, lang)
                     then
                         treesitter.install(lang):wait()
                     end
