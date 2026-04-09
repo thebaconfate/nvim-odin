@@ -15,5 +15,6 @@ return {
             italic_functions = false,
             italic_variables = false,
         })
+        vim.cmd.colorscheme "vscode"
     end
 }
