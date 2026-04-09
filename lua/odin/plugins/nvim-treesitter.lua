@@ -1,53 +1,58 @@
 -- nvim-treesitter configuration
 return {
     "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate", -- Automatically update parsers
+    lazy = false,
+    build = ":TSUpdate",
     config = function()
-        require("nvim-treesitter.config").setup({
-            ensure_installed = {
-                -- Specify the languages you want
-                "c",
-                "lua",
-                "python",
-                "javascript",
-                "typescript",
-                "jsx",
-                "tsx",
-                "scala",
-                "css",
-                "html",
-                "java",
-                "astro",
-                "latex",
-                "yaml",
-                "dockerfile",
-                "jsdoc",
-                "vimdoc",
-                "racket",
-                -- "haskell",
-                -- "erlang",
-            },
-            sync_install = false,
-            highlight = {
-                enable = true, -- Enable highlighting
-                disable = {},  -- List of languages to disable (if any)
-            },
-            indent = {
-                enable = true, -- Enable indentation
-            },
-            -- Optional additional modules (text objects, playground, etc.)
-            textobjects = {
-                select = {
-                    enable = true,
-                    lookahead = true,
-                    keymaps = {
-                        ["af"] = "@function.outer",
-                        ["if"] = "@function.inner",
-                        ["ac"] = "@class.outer",
-                        ["ic"] = "@class.inner",
-                    },
-                },
-            },
+        local treesitter = require("nvim-treesitter")
+
+        -- optional (safe default)
+        treesitter.setup({
+            install_dir = vim.fn.stdpath("data") .. "/site",
+        })
+
+        -- install languages
+        local ensure_installed = {
+            -- Specify the languages you want
+            "c",
+            "lua",
+            "python",
+            "javascript",
+            "typescript",
+            "tsx",
+            "scala",
+            "css",
+            "html",
+            "java",
+            "astro",
+            "latex",
+            "yaml",
+            "dockerfile",
+            "jsdoc",
+            "vimdoc",
+            "racket",
+            -- "haskell",
+            -- "erlang",
+            "elixir",
+            "heex"
+        }
+
+        treesitter.install(ensure_installed)
+
+        -- From https://github.com/nvim-treesitter/nvim-treesitter/issues/8221#issuecomment-3436658280
+        vim.api.nvim_create_autocmd("FileType", {
+            callback = function(args)
+                local lang = vim.treesitter.language.get_lang(args.match)
+                if vim.list_contains(treesitter.get_available(), lang) then
+                    if not vim.list_contains(treesitter.get_installed(), lang)
+                        and not vim.list_contains(ensure_installed, lang)
+                    then
+                        treesitter.install(lang):wait()
+                    end
+                    vim.treesitter.start(args.buf)
+                end
+            end,
+            desc = "Enable nvim-treesitter and install parser if not installed"
         })
     end,
 }

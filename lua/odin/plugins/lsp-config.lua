@@ -52,7 +52,7 @@ return {
             "lua_ls",
             "jdtls",
             "astro",
-            "ts_ls",
+            --            "ts_ls",
             "html",
             "cssls",
             "yamlls",
@@ -61,7 +61,7 @@ return {
             "dockerls",
             "docker_compose_language_service",
             "jsonls",
-            "bashls"
+            "bashls",
             -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed.
             -- Simply run neovim in git bash or wsl bash if on windows
             --
@@ -70,7 +70,8 @@ return {
             -- "gopls",
             -- "hls",
             -- "erlangls",
-            -- "opencl_ls"
+            -- "opencl_ls,"
+            "elixirls"
         }
         local function load_server_config(server)
             local config_path = "odin.lsp." .. server
