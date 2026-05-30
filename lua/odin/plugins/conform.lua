@@ -21,7 +21,8 @@ return {
                 -- racket = { "raco_fmt" } -- Disable when working on R5RS or other dialects that turn brackets to square brackets
                 haskell = { "ormolu" },
                 erlang = { "erlfmt" },
-                clojure = { "cljfmt" }
+                clojure = { "cljfmt" },
+                lisp = { "cl_identify" }
             },
             default_format_opts = {
                 lsp_format = "fallback"
@@ -33,6 +34,19 @@ return {
                 raco_fmt = {
                     command = "raco",
                     args = { "fmt", "$FILENAME" },
+                    stdin = true,
+                },
+                cl_identify = {
+                    command = "sbcl",
+                    args = {
+                        "--noinform",
+                        "--non-interactive",
+                        "--eval",
+                        [[(progn
+                            (ql:quickload :cl-indentify :silent t)
+                            (uiop:symbol-call :indentify :indentify *standard-input* *standard-output*))]],
+                        "--quit"
+                    },
                     stdin = true,
                 }
             }

@@ -72,5 +72,18 @@ vim.api.nvim_create_autocmd("LspAttach", {
         vim.keymap.set("n", "Nd", function()
             vim.diagnostic.jump({ count = -1, float = true })
         end, opts)
+        vim.keymap.set("n", "<leader>cvd", function()
+            local diag = vim.diagnostic.get(ev.buf, { lnum = vim.fn.line('.') - 1 })
+            if #diag > 0 then
+                local msg = ""
+                for _, d in ipairs(diag) do
+                    msg = msg .. d.message .. "\n"
+                end
+                vim.fn.setreg('+', msg)
+                print("Diagnostic copied to clipboard")
+            else
+                print("No diagnostic found on this line")
+            end
+        end, opts)
     end,
 })

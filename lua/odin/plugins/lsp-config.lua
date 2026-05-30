@@ -52,7 +52,7 @@ return {
             "lua_ls",
             "jdtls",
             "astro",
-            --            "ts_ls",
+            "ts_ls",
             "html",
             "cssls",
             "yamlls",
@@ -71,7 +71,7 @@ return {
             -- "hls",
             -- "erlangls",
             -- "opencl_ls,"
-            "elixirls"
+            -- "elixirls"
         }
         local function load_server_config(server)
             local config_path = "odin.lsp." .. server
