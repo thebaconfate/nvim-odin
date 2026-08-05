@@ -66,6 +66,7 @@ return {
             -- Simply run neovim in git bash or wsl bash if on windows
             --
             "clangd",
+            "ltex_plus"
             -- "rust_analyzer",
             -- "gopls",
             -- "hls",
