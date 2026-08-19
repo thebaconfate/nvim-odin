@@ -1,5 +1,6 @@
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+
 if not (vim.fn.isdirectory(lazypath) == 1) then
     local lazyrepo = "https://github.com/folke/lazy.nvim.git"
     local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
@@ -16,8 +17,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim
-
-
 require("lazy").setup({
     spec = {
         -- import your plugins
@@ -39,33 +38,29 @@ vim.api.nvim_create_autocmd("LspAttach", {
         local opts = {
             buffer = ev.buf,
         }
+
         vim.keymap.set("n", "gd", function()
-            vim.lsp.buf.definition()
+            require("telescope.builtin").lsp_definitions()
         end, opts)
         vim.keymap.set("n", "gi", function()
-            vim.lsp.buf.implementation()
-        end, opts)
-        vim.keymap.set("n", "K", function()
-            vim.lsp.buf.hover()
-        end, opts)
-        vim.keymap.set("n", "<leader>vws", function()
-            vim.lsp.buf.workspace_symbol()
-        end, opts)
-        vim.keymap.set("n", "<leader>vd", function()
-            vim.diagnostic.open_float()
-        end, opts)
-        vim.keymap.set("n", "<leader>vca", function()
-            vim.lsp.buf.code_action()
+            require("telescope.builtin").lsp_implementations()
         end, opts)
         vim.keymap.set("n", "<leader>vrr", function()
-            vim.lsp.buf.references()
+            require("telescope.builtin").lsp_references()
         end, opts)
-        vim.keymap.set("n", "<leader>vrn", function()
-            vim.lsp.buf.rename()
+        vim.keymap.set("n", "<leader>vws", function()
+            require("telescope.builtin").lsp_workspace_symbols()
         end, opts)
-        vim.keymap.set("i", "<C-h>", function()
-            vim.lsp.buf.signature_help()
+        vim.keymap.set("n", "gD", function()
+            vim.lsp.buf.declaration()
         end, opts)
+
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+        vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
+        vim.keymap.set("n", "<leader>vca", vim.lsp.buf.code_action, opts)
+        vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, opts)
+        vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
+
         vim.keymap.set("n", "nd", function()
             vim.diagnostic.jump({ count = 1, float = true })
         end, opts)
