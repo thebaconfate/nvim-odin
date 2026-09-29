@@ -3,7 +3,7 @@
 > This readme was generated using Claude. It's probably incomplete but if you're
 > using Neovim you're probably clever enough to figure out the missing parts.
 
-My personal Neovim configuration, built on [lazy.nvim](https://github.com/folke/lazy.nvim). It includes LSP (via `mason.nvim` + native `vim.lsp`), completion (`nvim-cmp`), fuzzy finding (`telescope.nvim`), git integration (`gitsigns`, `vim-fugitive`), formatting (`conform.nvim`), treesitter, and a handful of quality-of-life plugins (`harpoon`, `oil.nvim`, `multicursor.nvim`, `zen-mode`, `which-key`, etc).
+My personal Neovim configuration, built on [lazy.nvim](https://github.com/folke/lazy.nvim). It includes LSP (via `mason.nvim` + native `vim.lsp`), completion (`blink.cmp`), fuzzy finding (`telescope.nvim`), git integration (`gitsigns`, `vim-fugitive`), formatting (`conform.nvim`), treesitter, and a handful of quality-of-life plugins (`harpoon`, `oil.nvim`, `multicursor.nvim`, `zen-mode`, `which-key`, etc).
 
 > **Requires Neovim 0.12.1+.** This config uses the new `vim.lsp.config()` / `vim.lsp.enable()` API, which does not exist on older versions.
 
@@ -19,7 +19,7 @@ These are needed regardless of OS for the config to work correctly:
 | **git**                                       | Bootstraps `lazy.nvim` and plugins, used by `telescope`'s `git_files`                                                        |
 | **A C compiler** (gcc/clang) + **make**       | Builds treesitter parsers and `telescope-fzf-native`                                                                         |
 | **ripgrep (`rg`)**                            | Powers Telescope file search & grep                                                                                          |
-| **fd**                                        | Faster file finding (optional but referenced as a Telescope dependency)                                                      |
+| **fd**                                        | Faster file finding — an external CLI used by Telescope, not a Neovim plugin                                                      |
 | **curl**, **unzip**, **tar**                  | Used by `mason.nvim` to download LSP servers/tools                                                                           |
 | **Node.js + npm**                             | Required by many Mason-installed LSP servers                                                                                 |
 | **Python 3 + pip**                            | Required for `pyright` and the `ruff_format` formatter                                                                       |
@@ -36,7 +36,7 @@ Optional, only needed if you actually use these filetypes:
 | **SBCL** (+ Quicklisp)                                            | The custom `cl_identify` Lisp formatter in `conform.lua`                                                                                     |
 | **Erlang + `erlfmt`**                                             | Erlang formatting                                                                                                                            |
 | **Clojure + `cljfmt`**                                            | Clojure formatting                                                                                                                           |
-| **`stylua`, `prettier`/`prettierd`, `astyle`, `ormolu`**          | Formatters for Lua/JS-TS/Java/Haskell — most of these can be installed straight from Mason (`:Mason`) instead of your system package manager |
+| **`stylua`, `prettier`/`prettierd`, `ruff`, `clang-format`, `latexindent`, `ormolu`, `cljfmt`** | Formatters for conform. These install automatically via `mason-tool-installer` — run `:MasonToolsInstall`. `astyle` (Java), `erlfmt`, `sbcl` and `raco` are **not** in the Mason registry and must come from your system package manager |
 
 Formatters and LSP servers that Mason can manage will be installed automatically the first time you launch Neovim (see the `servers` table in `lua/odin/plugins/lsp-config.lua`) — you mainly need Node/Python/a compiler present so Mason's installers succeed.
 
