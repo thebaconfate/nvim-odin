@@ -31,7 +31,9 @@ return {
             harpoon:list():select(3)
         end)
 
-        vim.keymap.set("n", "<C-m>", function()
+        -- NOTE: <C-m> is what terminals send for <CR>, so binding it here silently
+        -- rebound Enter in normal mode. <C-h> is free.
+        vim.keymap.set("n", "<C-h>", function()
             harpoon:list():select(4)
         end)
 
@@ -47,7 +49,7 @@ return {
             harpoon:list():replace_at(3)
         end)
 
-        vim.keymap.set("n", "<leader><C-m>", function()
+        vim.keymap.set("n", "<leader><C-h>", function()
             harpoon:list():replace_at(4)
         end)
     end,

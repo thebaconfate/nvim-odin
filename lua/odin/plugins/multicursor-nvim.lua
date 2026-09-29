@@ -8,6 +8,10 @@ return {
 
         local set = vim.keymap.set
 
+        -- NOTE: multicursor maps that would collide with harpoon (<leader>a/<leader>A)
+        -- or the substitute-word map in remap.lua (<leader>s) live under <leader>m.
+        -- Those plugins load later and would otherwise silently win.
+
         -- Add or skip cursor above/below the main cursor.
         set({ "n", "v" }, "<up>",
             function() mc.lineAddCursor(-1) end)
@@ -19,17 +23,17 @@ return {
             function() mc.lineSkipCursor(1) end)
 
         -- Add or skip adding a new cursor by matching word/selection
-        set({ "n", "v" }, "<leader>n",
+        set({ "n", "v" }, "<leader>mn",
             function() mc.matchAddCursor(1) end)
-        set({ "n", "v" }, "<leader>s",
+        set({ "n", "v" }, "<leader>ms",
             function() mc.matchSkipCursor(1) end)
-        set({ "n", "v" }, "<leader>N",
+        set({ "n", "v" }, "<leader>mN",
             function() mc.matchAddCursor(-1) end)
-        set({ "n", "v" }, "<leader>S",
+        set({ "n", "v" }, "<leader>mS",
             function() mc.matchSkipCursor(-1) end)
 
         -- Add all matches in the document
-        set({ "n", "v" }, "<leader>A", mc.matchAllAddCursors)
+        set({ "n", "v" }, "<leader>mA", mc.matchAllAddCursors)
 
         -- You can also add cursors with any motion you prefer:
         -- set("n", "<right>", function()
@@ -69,7 +73,7 @@ return {
         set("n", "<leader>gv", mc.restoreCursors)
 
         -- Align cursor columns.
-        set("n", "<leader>a", mc.alignCursors)
+        set("n", "<leader>ma", mc.alignCursors)
 
         -- Split visual selections by regex.
         set("v", "S", mc.splitCursors)
