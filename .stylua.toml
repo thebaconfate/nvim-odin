@@ -1,0 +1,7 @@
+# stylua defaults to tabs, but this config is 4-space indented and set.lua sets
+# expandtab / shiftwidth=4. Without this file, format-on-save silently reindents
+# every Lua file to tabs.
+indent_type = "Spaces"
+indent_width = 4
+column_width = 120
+quote_style = "AutoPreferDouble"
