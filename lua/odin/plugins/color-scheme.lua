@@ -1,6 +1,10 @@
 return {
     -- https://github.com/Mofiqul/vscode.nvim
     'Mofiqul/vscode.nvim',
+    -- Load before everything else: after/plugin/color-scheme.lua used to re-apply
+    -- this at startup, which is no longer needed now that it is set here.
+    lazy = false,
+    priority = 1000,
     config = function()
         require('vscode').setup({
             -- Disable nvim-tree background color

@@ -4,7 +4,7 @@ return {
     config = function()
         require('lualine').setup({
             options = {
-                theme = 'codedark' -- Automatically syncs with the `onedarkpro` color scheme
+                theme = 'codedark' -- Matches the `vscode` colorscheme (Mofiqul/vscode.nvim)
             }
         })
     end
