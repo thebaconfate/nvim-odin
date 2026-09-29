@@ -25,60 +25,79 @@ require("lazy").setup({
     -- Configure any other settings here. See the documentation for more details.
     -- colorscheme that will be used when installing plugins.
     install = { colorscheme = { "habamax" } },
-    -- automatically check for plugin updates
-    checker = { enabled = true },
+    -- Checking for updates on every start costs a GitHub round trip and produces
+    -- notifications you did not ask for; run :Lazy check when you want to know.
+    checker = { enabled = false },
+    -- No plugin here needs luarocks, and leaving it on makes :checkhealth report an
+    -- error about a missing hererocks install.
+    rocks = { enabled = false },
+    performance = {
+        rtp = {
+            disabled_plugins = {
+                "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin",
+                -- oil.nvim is the file explorer (default_file_explorer = true)
+                "netrwPlugin",
+            },
+        },
+    },
 })
 
+-- Neovim 0.11+ already maps grn (rename), gra (code action), grr (references),
+-- gri (implementation), gO (document symbol), K (hover), <C-s> (signature help)
+-- and ]d / [d (diagnostic jump). Only the additions worth having are set here.
 vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(ev)
-        local client = vim.lsp.get_client_by_id(ev.data.client_id)
-        if client ~= nil and client:supports_method('textDocument/completion') then
-            vim.lsp.completion.enable(true, client.id, ev.buf, { autoTrigger = true })
+        local function map(mode, lhs, rhs, desc)
+            vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, desc = desc })
         end
-        local opts = {
-            buffer = ev.buf,
-        }
 
-        vim.keymap.set("n", "gd", function()
+        -- Inlay hints are configured per-server (see after/lsp/vtsls.lua) but render
+        -- nothing until enabled here.
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        if client and client:supports_method("textDocument/inlayHint") then
+            vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
+        end
+        map("n", "<leader>vih", function()
+            vim.lsp.inlay_hint.enable(
+                not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }),
+                { bufnr = ev.buf }
+            )
+        end, "LSP: toggle inlay hints")
+
+        -- Telescope-backed variants of the built-in jumps: these give a picker
+        -- instead of the quickfix list, which is why they override the defaults.
+        map("n", "gd", function()
             require("telescope.builtin").lsp_definitions()
-        end, opts)
-        vim.keymap.set("n", "gi", function()
+        end, "LSP: definitions (Telescope)")
+        map("n", "gi", function()
             require("telescope.builtin").lsp_implementations()
-        end, opts)
-        vim.keymap.set("n", "<leader>vrr", function()
+        end, "LSP: implementations (Telescope)")
+        map("n", "<leader>vrr", function()
             require("telescope.builtin").lsp_references()
-        end, opts)
-        vim.keymap.set("n", "<leader>vws", function()
+        end, "LSP: references (Telescope)")
+        map("n", "<leader>vws", function()
             require("telescope.builtin").lsp_workspace_symbols()
-        end, opts)
-        vim.keymap.set("n", "gD", function()
-            vim.lsp.buf.declaration()
-        end, opts)
+        end, "LSP: workspace symbols (Telescope)")
 
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-        vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts)
-        vim.keymap.set("n", "<leader>vca", vim.lsp.buf.code_action, opts)
-        vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, opts)
-        vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts)
+        map("n", "gD", vim.lsp.buf.declaration, "LSP: go to declaration")
+        map("n", "<leader>vd", vim.diagnostic.open_float, "Diagnostics: show float")
 
-        vim.keymap.set("n", "nd", function()
+        map("n", "nd", function()
             vim.diagnostic.jump({ count = 1, float = true })
-        end, opts)
-        vim.keymap.set("n", "Nd", function()
+        end, "Diagnostics: next")
+        map("n", "Nd", function()
             vim.diagnostic.jump({ count = -1, float = true })
-        end, opts)
-        vim.keymap.set("n", "<leader>cvd", function()
-            local diag = vim.diagnostic.get(ev.buf, { lnum = vim.fn.line('.') - 1 })
-            if #diag > 0 then
-                local msg = ""
-                for _, d in ipairs(diag) do
-                    msg = msg .. d.message .. "\n"
-                end
-                vim.fn.setreg('+', msg)
-                print("Diagnostic copied to clipboard")
-            else
-                print("No diagnostic found on this line")
+        end, "Diagnostics: previous")
+
+        map("n", "<leader>cvd", function()
+            local diag = vim.diagnostic.get(ev.buf, { lnum = vim.fn.line(".") - 1 })
+            if #diag == 0 then
+                vim.notify("No diagnostic found on this line", vim.log.levels.WARN)
+                return
             end
-        end, opts)
+            local msg = vim.iter(diag):map(function(d) return d.message end):join("\n")
+            vim.fn.setreg("+", msg)
+            vim.notify("Diagnostic copied to clipboard")
+        end, "Diagnostics: copy line diagnostics to clipboard")
     end,
 })

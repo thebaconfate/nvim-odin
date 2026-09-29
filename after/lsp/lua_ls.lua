@@ -45,7 +45,8 @@ return {
     end,
     settings = {
         Lua = {
-            runtime = { version = "Lua 5.1" },
+            -- NOTE: `runtime.version` is set by the on_init hook above (LuaJIT), which runs
+            -- later and wins. Setting it statically here had no effect.
             diagnostics = {
                 globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
             },

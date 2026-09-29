@@ -2,27 +2,20 @@ return {
     "neovim/nvim-lspconfig",
     dependencies = {
         "stevearc/conform.nvim",
-        "williamboman/mason.nvim",
-        "williamboman/mason-lspconfig.nvim",
-        "hrsh7th/cmp-nvim-lsp",
-        "hrsh7th/cmp-buffer",
-        "hrsh7th/cmp-path",
-        "hrsh7th/cmp-cmdline",
-        "hrsh7th/nvim-cmp",
-        "L3MON4D3/LuaSnip",
-        "saadparwaiz1/cmp_luasnip",
+        -- NOTE: mason moved org from williamboman/* to mason-org/* with v2.
+        "mason-org/mason.nvim",
+        "mason-org/mason-lspconfig.nvim",
         "j-hui/fidget.nvim",
+        "saghen/blink.cmp",
     },
     config = function()
-        local cmp = require("cmp")
-
         local function file_exists(path)
             return vim.fn.filereadable(path) == 1
         end
 
         local function get_shell()
             if vim.fn.has("win32") == 0 then
-                -- Native linux, return the shell
+                -- Native unix, return the shell
                 return vim.env.SHELL or "/bin/bash"
             end
             local git_bash = "C:\\Program Files\\Git\\bin\\bash.exe" -- Use Git Bash
@@ -33,10 +26,7 @@ return {
                 vim.notify("No msys64 found, defaulting to git bash as shell. Please install msys64 for future use")
                 return git_bash
             else
-                vim.notify(
-                    "No Bash found! Some features may not work.",
-                    vim.log.levels.WARN
-                )
+                vim.notify("No Bash found! Some features may not work.", vim.log.levels.WARN)
                 return nil
             end
         end
@@ -44,20 +34,26 @@ return {
         require("fidget").setup({})
         require("mason").setup({
             PATH = "prepend", -- Ensures Mason binaries are found first
-            log_level = vim.log.levels.DEBUG,
-            shell = get_shell()
-
+            shell = get_shell(),
         })
+
         local servers = {
             "lua_ls",
-            "jdtls",
             "astro",
-            "ts_ls",
+            -- vtsls wraps the same tsserver but reimplements the VS Code extension
+            -- layer, so inlay hints / organizeImports / "move to file" actually work.
+            "vtsls",
+            -- oxlint (oxc) is the linter in the qargo frontend. lspconfig prefers the
+            -- project-local node_modules/.bin/oxlint and roots on .oxlintrc.json, so it
+            -- stays quiet in projects that do not use it.
+            "oxlint",
             "html",
             "cssls",
             "yamlls",
             "texlab",
-            "pyright",
+            "basedpyright",
+            -- Types and hover come from basedpyright; ruff adds linting and fix-alls.
+            "ruff",
             "dockerls",
             "docker_compose_language_service",
             "jsonls",
@@ -66,7 +62,8 @@ return {
             -- Simply run neovim in git bash or wsl bash if on windows
             --
             "clangd",
-            "ltex_plus"
+            "ltex_plus",
+            "marksman", -- markdown: cross-file links, headings, rename
             -- "rust_analyzer",
             -- "gopls",
             -- "hls",
@@ -74,58 +71,33 @@ return {
             -- "opencl_ls,"
             -- "elixirls"
         }
-        local function load_server_config(server)
-            local config_path = "odin.lsp." .. server
-            local success, config = pcall(require, config_path)
 
-            if success then
-                return config
-            else
-                -- Fallback to default config if no custom config is found
-                return {}
-            end
-        end
         require("mason-lspconfig").setup({
             ensure_installed = servers,
+            -- We call vim.lsp.enable ourselves below; letting mason-lspconfig also enable
+            -- every installed server would start servers we never asked for.
+            automatic_enable = false,
         })
 
-        for _, server in ipairs(servers) do
-            vim.lsp.config(server, load_server_config(server))
-            vim.lsp.enable(server)
-        end
-
-        vim.lsp.enable('racket_langserver')
-        local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
-        cmp.setup({
-            snippet = {
-                expand = function(args)
-                    require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
-                end,
-            },
-            mapping = cmp.mapping.preset.insert({
-                ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
-                ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
-                ["<Tab>"] = cmp.mapping.confirm({ select = true }),
-                ["<C-y>"] = cmp.mapping.confirm({ select = true }),
-                ["<C-Space>"] = cmp.mapping.complete(),
-            }),
-            sources = cmp.config.sources({
-                { name = "nvim_lsp" },
-                { name = "luasnip" }, -- For luasnip users.
-                { name = "buffer" },
-                { name = 'path' }
-            }),
-
+        -- blink.cmp does not register its capabilities anywhere itself, so advertise them
+        -- once for every server rather than per-config.
+        vim.lsp.config("*", {
+            capabilities = require("blink.cmp").get_lsp_capabilities(nil, true),
         })
+
+        -- Per-server settings live in after/lsp/<server>.lua and are picked up automatically.
+        -- They must sit in after/ rather than lsp/: Neovim merges every lsp/<name>.lua on the
+        -- runtimepath with "force" and the LAST one wins, so a plain lsp/ dir would be
+        -- overridden by nvim-lspconfig's bundled defaults. See :h lsp-config.
+        vim.lsp.enable(servers)
+        vim.lsp.enable("racket_langserver")
 
         vim.diagnostic.config({
             virtual_lines = true,
-            update_in_insert = true,
+            update_in_insert = false,
             float = {
                 focusable = false,
                 style = "minimal",
-                border = "rounded",
                 source = true,
                 header = "",
                 prefix = "",
