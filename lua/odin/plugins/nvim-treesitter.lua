@@ -1,6 +1,9 @@
 -- nvim-treesitter configuration
 return {
     "nvim-treesitter/nvim-treesitter",
+    -- The config below uses the rewritten API (install/get_installed), which only
+    -- exists on the main branch. Pin it rather than relying on the default branch.
+    branch = "main",
     lazy = false,
     build = ":TSUpdate",
     config = function()
