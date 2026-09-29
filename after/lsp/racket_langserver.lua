@@ -1,17 +1,8 @@
 return {
     cmd = { "racket", "-l", "racket-langserver" },
     filetypes = { "racket" },
-    root_marker = { '*.rkt', ".git" },
-    single_file_support = true,
-    on_attach = function(client, bufnr)
-        -- Optional: Auto-format on save
-        if client.server_capabilities.documentFormattingProvider then
-            vim.api.nvim_create_autocmd("BufWritePre", {
-                buffer = bufnr,
-                callback = function()
-                    vim.lsp.buf.format()
-                end,
-            })
-        end
-    end,
+    -- NOTE: `root_markers` (plural) is the vim.lsp.Config key; `root_marker` was silently ignored.
+    root_markers = { "*.rkt", ".git" },
+    -- NOTE: formatting on save is handled by conform (see lua/odin/plugins/conform.lua),
+    -- which falls back to the LSP. Registering a BufWritePre hook here formatted twice.
 }
