@@ -51,8 +51,16 @@ return {
             "cssls",
             "yamlls",
             "texlab",
-            "basedpyright",
-            -- Types and hover come from basedpyright; ruff adds linting and fix-alls.
+            -- EXPERIMENT (branch try-pyrefly): pyrefly instead of basedpyright.
+            -- Measured on ~/dev/qargo/backend/projects/tms, first completion in a file:
+            --   basedpyright 1353ms -> 219ms -> 2ms      pyrefly 318ms -> 1ms -> 1ms
+            -- Same capabilities; pyrefly returns 16 fewer items, all dunders.
+            -- pyrefly does NOT read pyrightconfig.json, so the Django false-positive
+            -- suppressions live in a local projects/tms/pyrefly.toml.
+            -- Swap these two lines to go back.
+            -- "basedpyright",
+            "pyrefly",
+            -- Types and hover come from the Python type checker; ruff adds linting and fix-alls.
             "ruff",
             "dockerls",
             "docker_compose_language_service",
@@ -93,7 +101,10 @@ return {
         vim.lsp.enable("racket_langserver")
 
         vim.diagnostic.config({
-            virtual_lines = true,
+            -- Virtual lines are loud, so reserve them for things worth interrupting
+            -- for. HINT-level notes (e.g. pyrefly's unused-parameter on callback
+            -- signatures) still show in the sign column and on <leader>vd.
+            virtual_lines = { severity = { min = vim.diagnostic.severity.WARN } },
             update_in_insert = false,
             float = {
                 focusable = false,

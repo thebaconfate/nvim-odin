@@ -1,6 +1,6 @@
 return {
-    -- ruff owns linting, import sorting and quick fixes; basedpyright stays the source
-    -- of truth for types and hover. Without this, both answer `K` with different content.
+    -- ruff owns linting, import sorting and quick fixes; the Python type checker stays the
+    -- source of truth for types and hover. Without this, both answer `K` with different content.
     on_attach = function(client)
         client.server_capabilities.hoverProvider = false
     end,
