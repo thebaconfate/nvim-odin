@@ -47,7 +47,8 @@ vim.o.foldenable = true
 
 vim.api.nvim_create_autocmd("FileType", {
     group = vim.api.nvim_create_augroup("odin_prose_textwidth", { clear = true }),
-    pattern = { "markdown", "tex", "plaintex", "text", "gitcommit" },
+    -- gitcommit is left out: Neovim's own ftplugin already wraps it at git's 72.
+    pattern = { "markdown", "tex", "plaintex", "text" },
     callback = function()
         vim.opt_local.textwidth = 80
     end,

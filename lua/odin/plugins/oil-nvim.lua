@@ -1,8 +1,5 @@
 return {
     'stevearc/oil.nvim',
-    ---@module 'oil'
-    ---@type oil.SetupOpts
-    opts = {},
     -- One icon provider for the whole config: lualine, telescope and render-markdown
     -- all use nvim-web-devicons, so oil does too rather than pulling in mini.icons.
     dependencies = { "nvim-tree/nvim-web-devicons" },

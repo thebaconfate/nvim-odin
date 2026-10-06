@@ -24,7 +24,8 @@ return {
             updateImportsOnFileMove = { enabled = "always" },
         },
         vtsls = {
-            -- Surfaces the "move to file" / "extract to file" refactors
+            -- Fuzzy-filter completions in the server, so large lists are trimmed
+            -- before they are sent to the client
             experimental = { completion = { enableServerSideFuzzyMatch = true } },
         },
     },

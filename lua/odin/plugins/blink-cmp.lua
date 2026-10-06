@@ -12,9 +12,6 @@ return {
             ["<C-y>"] = { "accept", "fallback" },
         },
         appearance = {
-            -- Fall back to nvim-cmp's highlight groups, which the vscode colorscheme
-            -- already styles.
-            use_nvim_cmp_as_default = true,
             -- 'mono' matches Nerd Font Mono glyph widths so the icon column lines up.
             nerd_font_variant = "mono",
         },

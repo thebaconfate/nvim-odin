@@ -5,10 +5,8 @@ return {
     ft = { "scala", "sbt" },
     dependencies = {
         "nvim-lua/plenary.nvim",
-        {
-            "j-hui/fidget.nvim",
-            opts = {},
-        },
+        -- No opts: lsp-config.lua already calls fidget's setup.
+        "j-hui/fidget.nvim",
     },
     opts = function()
         local metals_config = require("metals").bare_config()
