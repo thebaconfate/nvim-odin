@@ -17,13 +17,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     desc = "Strip trailing whitespace on save",
 })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
-    group = vim.api.nvim_create_augroup("odin_latex_build", { clear = true }),
-    pattern = "*.tex",
-    command = "silent !latexmk -pdf %",
-    desc = "Rebuild the PDF after saving a LaTeX file",
-})
-
 vim.filetype.add({
     extension = {
         cl = "opencl",
