@@ -22,21 +22,21 @@ These are needed regardless of OS for the config to work correctly:
 | **fd**                                        | Faster file finding — an external CLI used by Telescope, not a Neovim plugin                                                      |
 | **curl**, **unzip**, **tar**                  | Used by `mason.nvim` to download LSP servers/tools                                                                           |
 | **Node.js + npm**                             | Required by many Mason-installed LSP servers                                                                                 |
-| **Python 3 + pip**                            | Required for `pyright` and the `ruff_format` formatter                                                                       |
-| **A [Nerd Font](https://www.nerdfonts.com/)** | Icons in `nvim-web-devicons`, `mini.icons`, `lualine` — install it and set it as your **terminal's** font, not inside Neovim |
+| **Python 3 + pip**                            | Required for Mason's Python tools: `pyrefly`, `ruff`, and the `black`/`isort` fallbacks (a project's own venv copy wins)    |
+| **A [Nerd Font](https://www.nerdfonts.com/)** | Icons in `nvim-web-devicons`, `lualine` — install it and set it as your **terminal's** font, not inside Neovim               |
 
 Optional, only needed if you actually use these filetypes:
 
 | Tool                                                              | Used for                                                                                                                                     |
 | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A JDK** (e.g. Temurin 17+)                                      | `jdtls` (Java LSP)                                                                                                                           |
-| **A LaTeX distribution** (TeX Live / MacTeX / MiKTeX) + `latexmk` | `texlab` LSP + auto-build `.tex` on save                                                                                                     |
+| **A LaTeX distribution** + `latexmk`                              | `texlab` LSP, which also builds `.tex` on save. macOS: BasicTeX or MacTeX (MiKTeX's macOS build is stuck at 22.1, Intel-only). Windows: MiKTeX |
 | **clang-format**                                                  | C formatting (usually ships with LLVM/clang)                                                                                                 |
 | **Racket**                                                        | `racket_langserver`                                                                                                                          |
 | **SBCL** (+ Quicklisp)                                            | The custom `cl_identify` Lisp formatter in `conform.lua`                                                                                     |
 | **Erlang + `erlfmt`**                                             | Erlang formatting                                                                                                                            |
 | **Clojure + `cljfmt`**                                            | Clojure formatting                                                                                                                           |
-| **`stylua`, `prettier`/`prettierd`, `ruff`, `clang-format`, `latexindent`, `ormolu`, `cljfmt`** | Formatters for conform. These install automatically via `mason-tool-installer` — run `:MasonToolsInstall`. `astyle` (Java), `erlfmt`, `sbcl` and `raco` are **not** in the Mason registry and must come from your system package manager |
+| **`stylua`, `prettier`/`prettierd`, `black`, `isort`, `clang-format`, `latexindent`, `ormolu`, `cljfmt`** | Formatters for conform. These install via `mason-tool-installer` (along with `ruff` and `jdtls`, which are LSPs) — run `:MasonToolsInstall`. `astyle` (Java), `erlfmt`, `sbcl` and `raco` are **not** in the Mason registry and must come from your system package manager |
 
 Formatters and LSP servers that Mason can manage will be installed automatically the first time you launch Neovim (see the `servers` table in `lua/odin/plugins/lsp-config.lua`) — you mainly need Node/Python/a compiler present so Mason's installers succeed.
 
@@ -92,8 +92,8 @@ npm install -g prettier @fsouza/prettierd prettier-plugin-astro
 
 # --- everything below is unconfirmed / suspected-but-unverified ---
 
-# TypeScript + its LSP (ts_ls)
-npm install -g typescript typescript-language-server
+# TypeScript: nothing global needed. vtsls comes from Mason; projects on TS 7+ use
+# their own node_modules/.bin/tsc --lsp instead (see lua/odin/typescript.lua).
 
 # html / cssls — vscode-langservers-extracted bundles both
 npm install -g vscode-langservers-extracted
@@ -102,7 +102,7 @@ npm install -g vscode-langservers-extracted
 npm install -g dockerfile-language-server-nodejs
 ```
 
-If in doubt, skip the unconfirmed block, run `:Mason` / `:LspInfo` on a matching file, and only install a package by hand if the server actually fails to launch.
+If in doubt, skip the unconfirmed block, run `:Mason` / `:checkhealth vim.lsp` on a matching file, and only install a package by hand if the server actually fails to launch.
 
 #### Racket
 
@@ -156,7 +156,7 @@ Link the JDK if `jdtls` can't find it:
 sudo ln -sfn $(brew --prefix openjdk)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
 ```
 
-Same global npm packages as the Fedora section above apply here too — `prettier`, `@fsouza/prettierd`, and `prettier-plugin-astro` are confirmed necessary; `typescript`, `typescript-language-server`, `vscode-langservers-extracted`, and `dockerfile-language-server-nodejs` are an educated guess Mason may already handle on its own.
+Same global npm packages as the Fedora section above apply here too — `prettier`, `@fsouza/prettierd`, and `prettier-plugin-astro` are confirmed necessary; `vscode-langservers-extracted` and `dockerfile-language-server-nodejs` are an educated guess Mason may already handle on its own.
 
 For Racket, install [DrRacket](https://racket-lang.org/) (bundles `raco`) rather than a Homebrew package — this one **is** confirmed manual — then run `raco pkg install racket-langserver`.
 
@@ -239,6 +239,6 @@ git clone <this-repo-url> $env:LOCALAPPDATA\nvim
 
 - **Icons show as boxes/question marks** → your terminal font isn't a Nerd Font, or your terminal emulator hasn't been told to use it.
 - **`telescope-fzf-native` build fails** → you're missing a C compiler/`make` (Windows: install via MSYS2 as above).
-- **An LSP server never attaches** → run `:LspInfo` in the buffer, and `:Mason` to check the server actually installed; most failures trace back to a missing Node.js/Python/JDK.
+- **An LSP server never attaches** → run `:checkhealth vim.lsp` in the buffer, and `:Mason` to check the server actually installed; most failures trace back to a missing Node.js/Python/JDK.
 - **`:TSUpdate` / parser errors** → make sure your C compiler is on PATH; treesitter compiles parsers locally.
-- **LaTeX files don't build on save** → confirm `latexmk` is on PATH (`lua/odin/init.lua` runs it via an autocommand, and `texlab.lua` also calls it).
+- **LaTeX files don't build on save** → confirm `latexmk` is on PATH, and restart Neovim after installing a TeX distribution so texlab inherits the new PATH. texlab is the only thing that builds (`after/lsp/texlab.lua`).
