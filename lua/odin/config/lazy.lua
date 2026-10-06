@@ -51,12 +51,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
             vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, desc = desc })
         end
 
-        -- Inlay hints are configured per-server (see after/lsp/vtsls.lua) but render
-        -- nothing until enabled here.
-        local client = vim.lsp.get_client_by_id(ev.data.client_id)
-        if client and client:supports_method("textDocument/inlayHint") then
-            vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
-        end
+        -- Inlay hints are configured per-server (see after/lsp/vtsls.lua) but are off by
+        -- default: Neovim re-requests them after every keystroke, and in ~/dev/qargo/frontend
+        -- tsc/vtsls take 1-2s per request, queueing in front of completions (measured typing
+        -- a line there: completion median 75-170ms with hints, 41-50ms without).
+        -- Show them per buffer when wanted.
         map("n", "<leader>vih", function()
             vim.lsp.inlay_hint.enable(
                 not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }),
