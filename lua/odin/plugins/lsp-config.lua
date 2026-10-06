@@ -97,6 +97,16 @@ return {
         -- overridden by nvim-lspconfig's bundled defaults. See :h lsp-config.
         vim.lsp.enable(servers)
         vim.lsp.enable("racket_langserver")
+        -- EXPERIMENT (branch try-tsc): TypeScript 7's native `tsc --lsp` in projects on
+        -- TS 7+, vtsls everywhere else (lua/odin/typescript.lua decides). Enabled outside
+        -- `servers` because it is not a Mason package: it runs the project's own compiler.
+        -- Measured on ~/dev/qargo/frontend (TS 7.0.2, vtsls bundles 5.9.3), 3 runs on
+        -- MetricOverrideTableField.tsx:
+        --   first non-empty completion after open   vtsls 6.4-7.1s    tsc 0.7-1.0s
+        --   hover once loaded                       vtsls ~460ms      tsc ~150ms
+        -- Same completion items, same capabilities; tsc also advertises willRenameFiles.
+        -- Delete this line to go back to vtsls everywhere.
+        vim.lsp.enable("tsc")
 
         vim.diagnostic.config({
             -- Virtual lines are loud, so reserve them for things worth interrupting
