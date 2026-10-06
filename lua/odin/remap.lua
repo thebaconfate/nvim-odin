@@ -14,7 +14,7 @@ vim.keymap.set("n", "<leader>Y", [["+Y]])
 -- Deletes the selection or motion into the void register, prevents overriding the default register when using motions
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 
--- Goes to the next identical word under the cursor
+-- Substitutes every occurrence of the word under the cursor, cursor placed in the replacement
 vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
 -- Re-sources the config

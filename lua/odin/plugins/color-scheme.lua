@@ -20,5 +20,8 @@ return {
             italic_variables = false,
         })
         vim.cmd.colorscheme "vscode"
+        -- vscode.nvim styles every BlinkCmp* group except this one. Link it to the
+        -- theme's struck-through nvim-cmp group so deprecated items stay crossed out.
+        vim.api.nvim_set_hl(0, "BlinkCmpLabelDeprecated", { link = "CmpItemAbbrDeprecated" })
     end
 }

@@ -87,11 +87,9 @@ return {
             automatic_enable = false,
         })
 
-        -- blink.cmp does not register its capabilities anywhere itself, so advertise them
-        -- once for every server rather than per-config.
-        vim.lsp.config("*", {
-            capabilities = require("blink.cmp").get_lsp_capabilities(nil, true),
-        })
+        -- NOTE: no vim.lsp.config("*", { capabilities = ... }) here. blink.cmp's own
+        -- plugin/blink-cmp.lua already registers its capabilities for every server on
+        -- 0.11+, which is why blink is a dependency above: it has to load first.
 
         -- Per-server settings live in after/lsp/<server>.lua and are picked up automatically.
         -- They must sit in after/ rather than lsp/: Neovim merges every lsp/<name>.lua on the
