@@ -66,13 +66,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
         -- Telescope-backed variants of the built-in jumps: these give a picker
         -- instead of the quickfix list, which is why they override the defaults.
+        -- They take over the gr* keys rather than claiming new ones, so built-in
+        -- `gi` (resume insert where you last left it) stays available.
         map("n", "gd", function()
             require("telescope.builtin").lsp_definitions()
         end, "LSP: definitions (Telescope)")
-        map("n", "gi", function()
+        map("n", "gri", function()
             require("telescope.builtin").lsp_implementations()
         end, "LSP: implementations (Telescope)")
-        map("n", "<leader>vrr", function()
+        map("n", "grr", function()
             require("telescope.builtin").lsp_references()
         end, "LSP: references (Telescope)")
         map("n", "<leader>vws", function()
