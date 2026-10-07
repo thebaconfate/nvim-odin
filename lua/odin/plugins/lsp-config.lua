@@ -91,6 +91,69 @@ return {
         -- plugin/blink-cmp.lua already registers its capabilities for every server on
         -- 0.11+, which is why blink is a dependency above: it has to load first.
 
+        -- Neovim 0.11+ already maps grn (rename), gra (code action), grr (references),
+        -- gri (implementation), gO (document symbol), K (hover), <C-s> (signature help)
+        -- and ]d / [d (diagnostic jump). Only the additions worth having are set here.
+        vim.api.nvim_create_autocmd("LspAttach", {
+            group = vim.api.nvim_create_augroup("odin_lsp_attach", { clear = true }),
+            callback = function(ev)
+                local function map(mode, lhs, rhs, desc)
+                    vim.keymap.set(mode, lhs, rhs, { buffer = ev.buf, desc = desc })
+                end
+
+                -- Inlay hints are configured per-server (see after/lsp/vtsls.lua) but are off by
+                -- default: Neovim re-requests them after every keystroke, and in ~/dev/qargo/frontend
+                -- tsc/vtsls take 1-2s per request, queueing in front of completions (measured typing
+                -- a line there: completion median 75-170ms with hints, 41-50ms without).
+                -- Show them per buffer when wanted.
+                map("n", "<leader>vih", function()
+                    vim.lsp.inlay_hint.enable(
+                        not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }),
+                        { bufnr = ev.buf }
+                    )
+                end, "LSP: toggle inlay hints")
+
+                -- Telescope-backed variants of the built-in jumps: these give a picker
+                -- instead of the quickfix list, which is why they override the defaults.
+                -- They take over the gr* keys rather than claiming new ones, so built-in
+                -- `gi` (resume insert where you last left it) stays available.
+                map("n", "gd", function()
+                    require("telescope.builtin").lsp_definitions()
+                end, "LSP: definitions (Telescope)")
+                map("n", "gri", function()
+                    require("telescope.builtin").lsp_implementations()
+                end, "LSP: implementations (Telescope)")
+                map("n", "grr", function()
+                    require("telescope.builtin").lsp_references()
+                end, "LSP: references (Telescope)")
+                map("n", "<leader>vws", function()
+                    require("telescope.builtin").lsp_workspace_symbols()
+                end, "LSP: workspace symbols (Telescope)")
+
+                map("n", "gD", vim.lsp.buf.declaration, "LSP: go to declaration")
+                map("n", "<leader>vd", vim.diagnostic.open_float, "Diagnostics: show float")
+
+                map("n", "nd", function()
+                    vim.diagnostic.jump({ count = 1, float = true })
+                end, "Diagnostics: next")
+                map("n", "Nd", function()
+                    vim.diagnostic.jump({ count = -1, float = true })
+                end, "Diagnostics: previous")
+
+                map("n", "<leader>cvd", function()
+                    local diag = vim.diagnostic.get(ev.buf, { lnum = vim.fn.line(".") - 1 })
+                    if #diag == 0 then
+                        vim.notify("No diagnostic found on this line", vim.log.levels.WARN)
+                        return
+                    end
+                    local msg = vim.iter(diag):map(function(d) return d.message end):join("\n")
+                    vim.fn.setreg("+", msg)
+                    vim.notify("Diagnostic copied to clipboard")
+                end, "Diagnostics: copy line diagnostics to clipboard")
+            end,
+            desc = "Buffer-local LSP keymaps",
+        })
+
         -- Per-server settings live in after/lsp/<server>.lua and are picked up automatically.
         -- They must sit in after/ rather than lsp/: Neovim merges every lsp/<name>.lua on the
         -- runtimepath with "force" and the LAST one wins, so a plain lsp/ dir would be
