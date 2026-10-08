@@ -4,7 +4,7 @@ return {
     config = function()
         require('lualine').setup({
             options = {
-                theme = 'codedark' -- Matches the `vscode` colorscheme (Mofiqul/vscode.nvim)
+                theme = 'vscode' -- Ships with Mofiqul/vscode.nvim, so mode colours match the colorscheme
             }
         })
     end
