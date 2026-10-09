@@ -113,22 +113,14 @@ return {
                     )
                 end, "LSP: toggle inlay hints")
 
-                -- Telescope-backed variants of the built-in jumps: these give a picker
-                -- instead of the quickfix list, which is why they override the defaults.
-                -- They take over the gr* keys rather than claiming new ones, so built-in
-                -- `gi` (resume insert where you last left it) stays available.
-                map("n", "gd", function()
-                    require("telescope.builtin").lsp_definitions()
-                end, "LSP: definitions (Telescope)")
-                map("n", "gri", function()
-                    require("telescope.builtin").lsp_implementations()
-                end, "LSP: implementations (Telescope)")
-                map("n", "grr", function()
-                    require("telescope.builtin").lsp_references()
-                end, "LSP: references (Telescope)")
-                map("n", "<leader>vws", function()
-                    require("telescope.builtin").lsp_workspace_symbols()
-                end, "LSP: workspace symbols (Telescope)")
+                -- Picker-backed variants of the built-in jumps (snacks.picker): these give a
+                -- picker instead of the quickfix list, which is why they override the
+                -- defaults. They take over the gr* keys rather than claiming new ones, so
+                -- built-in `gi` (resume insert where you last left it) stays available.
+                map("n", "gd", function() Snacks.picker.lsp_definitions() end, "LSP: definitions (picker)")
+                map("n", "gri", function() Snacks.picker.lsp_implementations() end, "LSP: implementations (picker)")
+                map("n", "grr", function() Snacks.picker.lsp_references() end, "LSP: references (picker)")
+                map("n", "<leader>vws", function() Snacks.picker.lsp_workspace_symbols() end, "LSP: workspace symbols (picker)")
 
                 map("n", "gD", vim.lsp.buf.declaration, "LSP: go to declaration")
                 map("n", "<leader>vd", vim.diagnostic.open_float, "Diagnostics: show float")

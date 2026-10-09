@@ -1,6 +1,6 @@
 return {
     'stevearc/oil.nvim',
-    -- One icon provider for the whole config: lualine, telescope and render-markdown
+    -- One icon provider for the whole config: lualine, the snacks picker and render-markdown
     -- all use nvim-web-devicons, so oil does too rather than pulling in mini.icons.
     dependencies = { "nvim-tree/nvim-web-devicons" },
     -- NOTE: deliberately NOT lazy-loaded. default_file_explorer only takes over from
