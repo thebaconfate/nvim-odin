@@ -7,6 +7,26 @@ My personal Neovim configuration, built on [lazy.nvim](https://github.com/folke/
 
 > **Requires Neovim 0.12.1+.** This config uses the new `vim.lsp.config()` / `vim.lsp.enable()` API, which does not exist on older versions.
 
+## Quick start (macOS / Linux)
+
+Clone the repo anywhere and run the install script from it:
+
+```bash
+git clone <this-repo-url> ~/.dotfiles/nvim-config
+~/.dotfiles/nvim-config/install.sh --dry-run   # see what it would do
+~/.dotfiles/nvim-config/install.sh
+```
+
+It installs what's missing and skips the rest, so it's safe to re-run:
+
+- **Tools:** git, make, a C compiler, curl, unzip, tar, `rg`, `fd`, Node + npm and Python 3, through dnf, apt, pacman or Homebrew (Xcode command line tools on macOS).
+- **Neovim ≥ 0.12.1:** Homebrew/pacman on macOS and Arch; elsewhere the official release build in `/opt/nvim`, since Fedora's and Debian's packages are too old.
+- **npm formatters:** the confirmed ones from [Global npm packages](#global-npm-packages).
+- **`~/.config/nvim`:** linked to the clone. An existing config is moved to `nvim.bak` first.
+- **Plugins and Mason tools:** installed headlessly. LSP servers follow on the first real start.
+
+Not covered: Windows, a Nerd Font, and the per-language toolchains (JDK, LaTeX, Racket, SBCL, …). For those, and for doing it by hand, see the sections below.
+
 ---
 
 ## 1. Prerequisites
