@@ -3,7 +3,7 @@
 > This readme was generated using Claude. It's probably incomplete but if you're
 > using Neovim you're probably clever enough to figure out the missing parts.
 
-My personal Neovim configuration, built on [lazy.nvim](https://github.com/folke/lazy.nvim). It includes LSP (via `mason.nvim` + native `vim.lsp`), completion (`blink.cmp`), fuzzy finding (`telescope.nvim`), git integration (`gitsigns`, `vim-fugitive`), formatting (`conform.nvim`), treesitter, and a handful of quality-of-life plugins (`harpoon`, `oil.nvim`, `multicursor.nvim`, `zen-mode`, `which-key`, etc).
+My personal Neovim configuration, built on [lazy.nvim](https://github.com/folke/lazy.nvim). It includes LSP (via `mason.nvim` + native `vim.lsp`), completion (`blink.cmp`), fuzzy finding (`snacks.nvim`'s picker), git integration (`gitsigns`, `vim-fugitive`), formatting (`conform.nvim`), treesitter, and a handful of quality-of-life plugins (`harpoon`, `oil.nvim`, `multicursor.nvim`, `zen-mode`, `which-key`, etc).
 
 > **Requires Neovim 0.12.1+.** This config uses the new `vim.lsp.config()` / `vim.lsp.enable()` API, which does not exist on older versions.
 
@@ -16,10 +16,10 @@ These are needed regardless of OS for the config to work correctly:
 | Tool                                          | Why                                                                                                                          |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **Neovim ≥ 0.12.1**                           | The editor itself                                                                                                            |
-| **git**                                       | Bootstraps `lazy.nvim` and plugins, used by `telescope`'s `git_files`                                                        |
-| **A C compiler** (gcc/clang) + **make**       | Builds treesitter parsers and `telescope-fzf-native`                                                                         |
-| **ripgrep (`rg`)**                            | Powers Telescope file search & grep                                                                                          |
-| **fd**                                        | Faster file finding — an external CLI used by Telescope, not a Neovim plugin                                                      |
+| **git**                                       | Bootstraps `lazy.nvim` and plugins, used by the picker's `git_files`                                                         |
+| **A C compiler** (gcc/clang) + **make**       | Builds treesitter parsers                                                                                                    |
+| **ripgrep (`rg`)**                            | Powers the picker's grep, and its file search when `fd` isn't installed                                                      |
+| **fd**                                        | Faster file finding — an external CLI the picker prefers over `rg`, not a Neovim plugin                                      |
 | **curl**, **unzip**, **tar**                  | Used by `mason.nvim` to download LSP servers/tools                                                                           |
 | **Node.js + npm**                             | Required by many Mason-installed LSP servers                                                                                 |
 | **Python 3 + pip**                            | Required for Mason's Python tools: `pyrefly`, `ruff`, and the `black`/`isort` fallbacks (a project's own venv copy wins)    |
@@ -169,7 +169,7 @@ brew install stylua   # or install via :Mason inside nvim
 
 ### Windows
 
-The cleanest path is **`winget`** (or **Scoop**, shown as an alternative). You'll also want a Bash-capable shell, since `lua/odin/plugins/lsp-config.lua` and `lua/odin/plugins/telescope.lua` both look for `msys64` or Git Bash to run shell commands (e.g. building `telescope-fzf-native`).
+The cleanest path is **`winget`** (or **Scoop**, shown as an alternative). You'll also want a Bash-capable shell, since `lua/odin/plugins/lsp-config.lua` looks for `msys64` or Git Bash to run shell commands.
 
 ```powershell
 winget install Neovim.Neovim
@@ -183,7 +183,7 @@ winget install MiKTeX.MiKTeX
 winget install MSYS2.MSYS2
 ```
 
-After installing MSYS2, open the **MSYS2 MinGW64** shell once and install a compiler/make so `telescope-fzf-native` and treesitter parsers can build:
+After installing MSYS2, open the **MSYS2 MinGW64** shell once and install a compiler/make so treesitter parsers can build:
 
 ```bash
 pacman -S mingw-w64-x86_64-gcc make
@@ -238,7 +238,6 @@ git clone <this-repo-url> $env:LOCALAPPDATA\nvim
 ## 5. Troubleshooting
 
 - **Icons show as boxes/question marks** → your terminal font isn't a Nerd Font, or your terminal emulator hasn't been told to use it.
-- **`telescope-fzf-native` build fails** → you're missing a C compiler/`make` (Windows: install via MSYS2 as above).
 - **An LSP server never attaches** → run `:checkhealth vim.lsp` in the buffer, and `:Mason` to check the server actually installed; most failures trace back to a missing Node.js/Python/JDK.
 - **`:TSUpdate` / parser errors** → make sure your C compiler is on PATH; treesitter compiles parsers locally.
 - **LaTeX files don't build on save** → confirm `latexmk` is on PATH, and restart Neovim after installing a TeX distribution so texlab inherits the new PATH. texlab is the only thing that builds (`after/lsp/texlab.lua`).
