@@ -1,5 +1,5 @@
 return {
-    'stevearc/oil.nvim',
+    "stevearc/oil.nvim",
     -- One icon provider for the whole config: lualine, the snacks picker and render-markdown
     -- all use nvim-web-devicons, so oil does too rather than pulling in mini.icons.
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -11,17 +11,17 @@ return {
             default_file_explorer = true,
             columns = { "icon" },
             view_options = {
-                show_hidden = true
+                show_hidden = true,
             },
             keymaps = {
                 ["<C-p>"] = false,
             },
             preview = {
-                layout = "vertical",       -- Vertical split
+                layout = "vertical", -- Vertical split
                 vertical = { width = 40 }, -- Customize the width
             },
         })
 
         vim.keymap.set("n", "<leader>pv", ":Oil<CR>", { desc = "Open Oil" })
-    end
+    end,
 }

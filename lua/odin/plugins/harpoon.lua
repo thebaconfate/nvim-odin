@@ -27,7 +27,7 @@ return {
             harpoon:list():select(2)
         end)
 
-        vim.keymap.set("n", '<C-l>', function()
+        vim.keymap.set("n", "<C-l>", function()
             harpoon:list():select(3)
         end)
 
@@ -45,7 +45,7 @@ return {
             harpoon:list():replace_at(2)
         end)
 
-        vim.keymap.set("n", '<leader><C-l>', function()
+        vim.keymap.set("n", "<leader><C-l>", function()
             harpoon:list():replace_at(3)
         end)
 

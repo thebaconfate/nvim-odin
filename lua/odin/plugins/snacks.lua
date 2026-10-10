@@ -24,19 +24,33 @@ local telescope_keys = {
 
 return {
     -- Only the picker: snacks enables just the modules listed in opts, the rest stay off.
-    'folke/snacks.nvim',
+    "folke/snacks.nvim",
     -- Loaded at startup, as snacks asks: plugins that hook into it (todo-comments' picker
     -- source) only register if Snacks exists by the time they load.
     lazy = false,
     priority = 1000,
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
-        { '<leader>pf',  pick('files', { hidden = true }), desc = 'Picker: find files' },
-        { '<C-p>',       pick('git_files'),                desc = 'Picker: git files' },
-        { '<leader>vh',  pick('help'),                     desc = 'Picker: help tags' },
-        { '<leader>pws', grep(function() return vim.fn.expand('<cword>') end), desc = 'Picker: grep word under cursor' },
-        { '<leader>pWs', grep(function() return vim.fn.expand('<cWORD>') end), desc = 'Picker: grep WORD under cursor' },
-        { '<leader>ps',  grep(function() return vim.fn.input('Grep > ') end),  desc = 'Picker: grep prompt' },
+        { "<leader>pf", pick("files", { hidden = true }), desc = "Picker: find files" },
+        { "<C-p>", pick("git_files"), desc = "Picker: git files" },
+        { "<leader>vh", pick("help"), desc = "Picker: help tags" },
+        {
+            "<leader>pws",
+            grep(function()
+                return vim.fn.expand("<cword>")
+            end),
+            desc = "Picker: grep word under cursor",
+        },
+        {
+            "<leader>pWs",
+            grep(function()
+                return vim.fn.expand("<cWORD>")
+            end),
+            desc = "Picker: grep WORD under cursor",
+        },
+        { "<leader>ps", grep(function()
+            return vim.fn.input("Grep > ")
+        end), desc = "Picker: grep prompt" },
     },
     opts = {
         picker = {

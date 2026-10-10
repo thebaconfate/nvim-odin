@@ -25,8 +25,6 @@ run() {
     fi
 }
 
-# dnf first (personal Fedora machines), and brew last so a Linux box that also has Homebrew
-# still uses the system package manager. On macOS only brew matches.
 PM=""
 for candidate in dnf apt-get pacman brew; do
     if command -v "$candidate" >/dev/null 2>&1; then

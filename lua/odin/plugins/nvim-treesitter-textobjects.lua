@@ -44,12 +44,12 @@ return {
 
         -- Move: ]m / [m between functions, ]] / [[ between classes.
         local moves = {
-            { "]m", move.goto_next_start,     "@function.outer", "Next function start" },
-            { "]M", move.goto_next_end,       "@function.outer", "Next function end" },
+            { "]m", move.goto_next_start, "@function.outer", "Next function start" },
+            { "]M", move.goto_next_end, "@function.outer", "Next function end" },
             { "[m", move.goto_previous_start, "@function.outer", "Previous function start" },
-            { "[M", move.goto_previous_end,   "@function.outer", "Previous function end" },
-            { "]]", move.goto_next_start,     "@class.outer",    "Next class start" },
-            { "[[", move.goto_previous_start, "@class.outer",    "Previous class start" },
+            { "[M", move.goto_previous_end, "@function.outer", "Previous function end" },
+            { "]]", move.goto_next_start, "@class.outer", "Next class start" },
+            { "[[", move.goto_previous_start, "@class.outer", "Previous class start" },
         }
         for _, m in ipairs(moves) do
             local lhs, fn, query, desc = m[1], m[2], m[3], m[4]
