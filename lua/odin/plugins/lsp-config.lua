@@ -40,35 +40,18 @@ return {
         local servers = {
             "lua_ls",
             "astro",
-            -- vtsls wraps the same tsserver but reimplements the VS Code extension
-            -- layer, so inlay hints / organizeImports / "move to file" actually work.
             "vtsls",
-            -- oxlint (oxc) is the linter in the qargo frontend. lspconfig prefers the
-            -- project-local node_modules/.bin/oxlint and roots on .oxlintrc.json, so it
-            -- stays quiet in projects that do not use it.
             "oxlint",
             "html",
             "cssls",
             "yamlls",
             "texlab",
-            -- EXPERIMENT (branch try-pyrefly): pyrefly instead of basedpyright.
-            -- Measured on ~/dev/qargo/backend/projects/tms, first completion in a file:
-            --   basedpyright 1353ms -> 219ms -> 2ms      pyrefly 318ms -> 1ms -> 1ms
-            -- Same capabilities; pyrefly returns 16 fewer items, all dunders.
-            -- pyrefly does NOT read pyrightconfig.json, so the Django false-positive
-            -- suppressions live in a local projects/tms/pyrefly.toml.
-            -- Swap these two lines to go back.
-            -- "basedpyright",
             "pyrefly",
-            -- Types and hover come from the Python type checker; ruff adds linting and fix-alls.
             "ruff",
             "dockerls",
             "docker_compose_language_service",
             "jsonls",
             "bashls",
-            -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed.
-            -- Simply run neovim in git bash or wsl bash if on windows
-            --
             "clangd",
             "ltex_plus",
             "marksman", -- markdown: cross-file links, headings, rename
@@ -107,20 +90,25 @@ return {
                 -- a line there: completion median 75-170ms with hints, 41-50ms without).
                 -- Show them per buffer when wanted.
                 map("n", "<leader>vih", function()
-                    vim.lsp.inlay_hint.enable(
-                        not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }),
-                        { bufnr = ev.buf }
-                    )
+                    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
                 end, "LSP: toggle inlay hints")
 
                 -- Picker-backed variants of the built-in jumps (snacks.picker): these give a
                 -- picker instead of the quickfix list, which is why they override the
                 -- defaults. They take over the gr* keys rather than claiming new ones, so
                 -- built-in `gi` (resume insert where you last left it) stays available.
-                map("n", "gd", function() Snacks.picker.lsp_definitions() end, "LSP: definitions (picker)")
-                map("n", "gri", function() Snacks.picker.lsp_implementations() end, "LSP: implementations (picker)")
-                map("n", "grr", function() Snacks.picker.lsp_references() end, "LSP: references (picker)")
-                map("n", "<leader>vws", function() Snacks.picker.lsp_workspace_symbols() end, "LSP: workspace symbols (picker)")
+                map("n", "gd", function()
+                    Snacks.picker.lsp_definitions()
+                end, "LSP: definitions (picker)")
+                map("n", "gri", function()
+                    Snacks.picker.lsp_implementations()
+                end, "LSP: implementations (picker)")
+                map("n", "grr", function()
+                    Snacks.picker.lsp_references()
+                end, "LSP: references (picker)")
+                map("n", "<leader>vws", function()
+                    Snacks.picker.lsp_workspace_symbols()
+                end, "LSP: workspace symbols (picker)")
 
                 map("n", "gD", vim.lsp.buf.declaration, "LSP: go to declaration")
                 map("n", "<leader>vd", vim.diagnostic.open_float, "Diagnostics: show float")
@@ -138,7 +126,11 @@ return {
                         vim.notify("No diagnostic found on this line", vim.log.levels.WARN)
                         return
                     end
-                    local msg = vim.iter(diag):map(function(d) return d.message end):join("\n")
+                    local msg = vim.iter(diag)
+                        :map(function(d)
+                            return d.message
+                        end)
+                        :join("\n")
                     vim.fn.setreg("+", msg)
                     vim.notify("Diagnostic copied to clipboard")
                 end, "Diagnostics: copy line diagnostics to clipboard")

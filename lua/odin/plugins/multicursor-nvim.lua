@@ -11,26 +11,33 @@ return {
         -- NOTE: multicursor maps that would collide with harpoon (<leader>a/<leader>A)
         -- or the substitute-word map in remap.lua (<leader>s) live under <leader>m.
         -- Those plugins load later and would otherwise silently win.
-
         -- Add or skip cursor above/below the main cursor.
-        set({ "n", "v" }, "<up>",
-            function() mc.lineAddCursor(-1) end)
-        set({ "n", "v" }, "<down>",
-            function() mc.lineAddCursor(1) end)
-        set({ "n", "v" }, "<leader><up>",
-            function() mc.lineSkipCursor(-1) end)
-        set({ "n", "v" }, "<leader><down>",
-            function() mc.lineSkipCursor(1) end)
+        set({ "n", "v" }, "<up>", function()
+            mc.lineAddCursor(-1)
+        end)
+        set({ "n", "v" }, "<down>", function()
+            mc.lineAddCursor(1)
+        end)
+        set({ "n", "v" }, "<leader><up>", function()
+            mc.lineSkipCursor(-1)
+        end)
+        set({ "n", "v" }, "<leader><down>", function()
+            mc.lineSkipCursor(1)
+        end)
 
         -- Add or skip adding a new cursor by matching word/selection
-        set({ "n", "v" }, "<leader>mn",
-            function() mc.matchAddCursor(1) end)
-        set({ "n", "v" }, "<leader>ms",
-            function() mc.matchSkipCursor(1) end)
-        set({ "n", "v" }, "<leader>mN",
-            function() mc.matchAddCursor(-1) end)
-        set({ "n", "v" }, "<leader>mS",
-            function() mc.matchSkipCursor(-1) end)
+        set({ "n", "v" }, "<leader>mn", function()
+            mc.matchAddCursor(1)
+        end)
+        set({ "n", "v" }, "<leader>ms", function()
+            mc.matchSkipCursor(1)
+        end)
+        set({ "n", "v" }, "<leader>mN", function()
+            mc.matchAddCursor(-1)
+        end)
+        set({ "n", "v" }, "<leader>mS", function()
+            mc.matchSkipCursor(-1)
+        end)
 
         -- Add all matches in the document
         set({ "n", "v" }, "<leader>mA", mc.matchAllAddCursors)
@@ -86,10 +93,12 @@ return {
         set("v", "M", mc.matchCursors)
 
         -- Rotate visual selection contents.
-        set("v", "<leader>t",
-            function() mc.transposeCursors(1) end)
-        set("v", "<leader>T",
-            function() mc.transposeCursors(-1) end)
+        set("v", "<leader>t", function()
+            mc.transposeCursors(1)
+        end)
+        set("v", "<leader>T", function()
+            mc.transposeCursors(-1)
+        end)
 
         -- Jumplist support
         set({ "v", "n" }, "<c-i>", mc.jumpForward)
@@ -103,5 +112,5 @@ return {
         hl(0, "MultiCursorDisabledCursor", { link = "Visual" })
         hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
         hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
-    end
+    end,
 }

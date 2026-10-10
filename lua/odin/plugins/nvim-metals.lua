@@ -17,10 +17,8 @@ return {
         -- metals attaches via initialize_or_attach, so it does not inherit the capabilities
         -- blink.cmp registers on vim.lsp.config("*"); set them explicitly here.
         local ok, blink = pcall(require, "blink.cmp")
-        metals_config.capabilities = ok and blink.get_lsp_capabilities()
-            or vim.lsp.protocol.make_client_capabilities()
-        metals_config.on_attach = function(_, _)
-        end
+        metals_config.capabilities = ok and blink.get_lsp_capabilities() or vim.lsp.protocol.make_client_capabilities()
+        metals_config.on_attach = function(_, _) end
         return metals_config
     end,
     config = function(self, metals_config)
@@ -32,6 +30,5 @@ return {
             end,
             group = nvim_metals_group,
         })
-    end
-
+    end,
 }

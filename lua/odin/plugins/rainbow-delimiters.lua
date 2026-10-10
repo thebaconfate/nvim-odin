@@ -4,8 +4,8 @@ return {
     config = function()
         vim.g.rainbow_delimiters = {
             query = {
-                [''] = 'rainbow-parens', -- ONLY parentheses/brackets
+                [""] = "rainbow-parens", -- ONLY parentheses/brackets
             },
         }
-    end
+    end,
 }

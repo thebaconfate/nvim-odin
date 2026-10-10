@@ -20,8 +20,7 @@ return {
         local js_config = { "oxfmt", "prettierd", "prettier", stop_after_first = true }
 
         -- Resolve a Python tool from the project's own virtualenv before falling back
-        -- to Mason/$PATH. ~/dev/qargo/backend pins black 24.4.2 in pyproject.toml, and a
-        -- newer black reformats differently - running the wrong one means fighting CI.
+        -- to Mason/$PATH.
         local function from_venv(tool)
             return function(_, ctx)
                 for dir in vim.fs.parents(ctx.filename) do
@@ -42,18 +41,8 @@ return {
                 typescriptreact = js_config,
                 javascript = js_config,
                 javascriptreact = js_config,
-                -- ruff_format is parked, not deleted - uncomment and drop the line
-                -- below to go back to it.
-                -- python = { "ruff_format" },
-                --
-                -- ~/dev/qargo/backend formats with black (line-length 119, [tool.black]
-                -- in the REPO-ROOT pyproject.toml - black finds it via the .git dir, past
-                -- projects/tms/pyproject.toml which has no [tool.black]) and orders
-                -- imports with isort (profile=black, custom STDLIB/DJANGO/PYDANTIC/...
-                -- sections in setup.cfg). isort order is enforced in CI by the
-                -- flake8-isort plugin. isort runs first; profile=black keeps them in
-                -- agreement.
-                python = { "isort", "black" },
+                python = { "ruff_format" },
+                -- python = { "isort", "black" },
                 astro = prettier_config,
                 css = prettier_config,
                 html = prettier_config,
@@ -77,6 +66,7 @@ return {
             formatters = {
                 black = { command = from_venv("black") },
                 isort = { command = from_venv("isort") },
+                ruff_format = { command = from_venv("ruff_format") },
                 oxfmt = {
                     -- Only run where the project actually uses oxfmt: conform's bundled
                     -- config anchors cwd to .oxfmtrc.json, and require_cwd makes a miss
