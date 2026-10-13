@@ -5,13 +5,25 @@
 # Language toolchains (JDK, LaTeX, Racket, SBCL, ...) are left to the README: they're big and
 # only needed per filetype. Windows isn't covered either; see the README.
 #
-#   ./install.sh            install what's missing
-#   ./install.sh --dry-run  only show what would happen
+#   ./install.sh                     install what's missing
+#   ./install.sh --update            update Neovim to its latest release, then the plugins and
+#                                    Mason tools (nothing else)
+#   ./install.sh --dry-run           only show what would happen; combines with --update
 
 set -euo pipefail
 
 DRY_RUN=0
-[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
+UPDATE=0
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run) DRY_RUN=1 ;;
+        --update) UPDATE=1 ;;
+        *)
+            echo "unknown option: $arg (use --dry-run and/or --update)" >&2
+            exit 1
+            ;;
+    esac
+done
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
@@ -32,6 +44,107 @@ for candidate in dnf apt-get pacman brew; do
         break
     fi
 done
+
+# Neovim helpers, used by --update and by step 2
+nvim_version() {
+    nvim --version 2>/dev/null | head -n 1 | sed -E 's/^NVIM v([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+}
+
+# version_at_least <version> <minimum>
+version_at_least() {
+    local IFS=.
+    local -a have=($1) want=($2)
+    local i
+    for i in 0 1 2; do
+        ((${have[i]:-0} > ${want[i]:-0})) && return 0
+        ((${have[i]:-0} < ${want[i]:-0})) && return 1
+    done
+    return 0
+}
+
+# The official release build, unpacked to /opt/nvim. Installs use it on Fedora and Debian;
+# --update also uses it on a Mac whose Neovim already lives in /opt/nvim.
+install_nvim_release() {
+    local os=linux arch
+    [[ "$(uname)" == "Darwin" ]] && os=macos
+    case "$(uname -m)" in
+        x86_64) arch="x86_64" ;;
+        aarch64 | arm64) arch="arm64" ;;
+        *)
+            echo "    no Neovim release build for $(uname -m); install Neovim >= $NVIM_MIN by hand"
+            return
+            ;;
+    esac
+    local url="https://github.com/neovim/neovim/releases/latest/download/nvim-$os-$arch.tar.gz"
+    if ((DRY_RUN)); then
+        echo "    would download $url, unpack it to /opt/nvim and link /usr/local/bin/nvim"
+        return
+    fi
+    local tmp
+    tmp="$(mktemp -d)"
+    curl -fL --progress-bar -o "$tmp/nvim.tar.gz" "$url"
+    tar -xzf "$tmp/nvim.tar.gz" -C "$tmp"
+    sudo rm -rf /opt/nvim
+    sudo mv "$tmp/nvim-$os-$arch" /opt/nvim
+    sudo mkdir -p /usr/local/bin
+    sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+    rm -rf "$tmp"
+}
+
+# The latest release's version. The releases/latest page redirects to .../tag/vX.Y.Z, which
+# needs no API token and has no rate limit.
+latest_nvim_release() {
+    curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/neovim/neovim/releases/latest |
+        sed -E 's|.*/tag/v?||'
+}
+
+# --update: Neovim through whatever installed it, then plugins and Mason tools
+update() {
+    local current latest nvim_path
+    current="$(nvim_version || true)"
+    nvim_path="$(command -v nvim || true)"
+    if [[ -z "$nvim_path" ]]; then
+        echo "neovim: not installed; run ./install.sh first"
+        exit 1
+    fi
+    if [[ "$nvim_path" == /opt/nvim/* || "$(readlink "$nvim_path" || true)" == /opt/nvim/* ]]; then
+        latest="$(latest_nvim_release || true)"
+        if [[ -z "$latest" ]]; then
+            echo "neovim: couldn't reach GitHub to look up the latest release"
+            exit 1
+        elif version_at_least "$current" "$latest"; then
+            echo "neovim: $current, already the latest release"
+        else
+            echo "neovim: updating $current to $latest in /opt/nvim"
+            install_nvim_release
+        fi
+    elif [[ "$PM" == brew ]] && brew list neovim >/dev/null 2>&1; then
+        echo "neovim: updating through Homebrew"
+        run brew upgrade neovim
+    else
+        echo "neovim: $nvim_path comes from your package manager; update it there (Arch: pacman -Syu)"
+    fi
+    hash -r
+
+    # Lazy! sync moves plugins past the lockfile to their latest versions, and records them in
+    # lazy-lock.json: commit that so the other machines get the same versions
+    local headless=(nvim --headless --cmd "let g:loaded_wakatime = 1")
+    echo "plugins: updating"
+    run "${headless[@]}" "+Lazy! sync" +qa
+    echo
+    echo "mason tools: updating"
+    run "${headless[@]}" "+Lazy! load mason-tool-installer.nvim" "+MasonToolsUpdateSync" +qa ||
+        echo "    some Mason tools failed; open nvim and run :Mason to see which"
+    echo
+    if ! git -C "$REPO" diff --quiet -- lazy-lock.json; then
+        echo "lazy-lock.json changed: commit it to keep your other machines on the same plugin versions"
+    fi
+}
+
+if ((UPDATE)); then
+    update
+    exit 0
+fi
 
 # 1. Command line tools. On macOS the Xcode command line tools bring git, make and a C compiler.
 if [[ "$(uname)" == "Darwin" ]]; then
@@ -95,47 +208,6 @@ tool python3       python3          "python3 python3-pip" "python3 python3-pip p
 
 # 2. Neovim itself. Fedora's and Debian's packages lag far behind, so on those the official
 #    release build goes to /opt/nvim instead; Homebrew and Arch ship current versions.
-nvim_version() {
-    nvim --version 2>/dev/null | head -n 1 | sed -E 's/^NVIM v([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
-}
-
-# version_at_least <version> <minimum>
-version_at_least() {
-    local IFS=.
-    local -a have=($1) want=($2)
-    local i
-    for i in 0 1 2; do
-        ((${have[i]:-0} > ${want[i]:-0})) && return 0
-        ((${have[i]:-0} < ${want[i]:-0})) && return 1
-    done
-    return 0
-}
-
-install_nvim_release() {
-    local arch
-    case "$(uname -m)" in
-        x86_64) arch="x86_64" ;;
-        aarch64 | arm64) arch="arm64" ;;
-        *)
-            echo "    no Neovim release build for $(uname -m); install Neovim >= $NVIM_MIN by hand"
-            return
-            ;;
-    esac
-    local url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$arch.tar.gz"
-    if ((DRY_RUN)); then
-        echo "    would download $url, unpack it to /opt/nvim and link /usr/local/bin/nvim"
-        return
-    fi
-    local tmp
-    tmp="$(mktemp -d)"
-    curl -fL --progress-bar -o "$tmp/nvim.tar.gz" "$url"
-    tar -xzf "$tmp/nvim.tar.gz" -C "$tmp"
-    sudo rm -rf /opt/nvim
-    sudo mv "$tmp/nvim-linux-$arch" /opt/nvim
-    sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
-    rm -rf "$tmp"
-}
-
 current="$(nvim_version || true)"
 if [[ -n "$current" ]] && version_at_least "$current" "$NVIM_MIN"; then
     echo "neovim: $current, already >= $NVIM_MIN"

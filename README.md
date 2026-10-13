@@ -25,6 +25,10 @@ It installs what's missing and skips the rest, so it's safe to re-run:
 - **`~/.config/nvim`:** linked to the clone. An existing config is moved to `nvim.bak` first.
 - **Plugins and Mason tools:** installed headlessly. LSP servers follow on the first real start.
 
+When a new Neovim comes out, `install.sh --update` updates it where it was installed (the
+release build in `/opt/nvim`, or Homebrew), then the plugins and Mason tools. Commit the
+changed `lazy-lock.json` afterwards so other machines get the same plugin versions.
+
 Not covered: Windows, a Nerd Font, and the per-language toolchains (JDK, LaTeX, Racket, SBCL, …). For those, and for doing it by hand, see the sections below.
 
 ---
