@@ -1,0 +1,8 @@
+# Tools this config needs, installed by mise. install.sh links this file to
+# ~/.config/mise/conf.d/nvim.toml, where mise merges it with your global config.
+# (It's in a mise/ folder under another name because mise would load a mise.toml in the
+# repo root as a project config, and ask to trust it.)
+[tools]
+java = "temurin-21" # jdtls needs Java 21+
+fd = "latest"       # snacks picker: file search
+ripgrep = "latest"  # snacks picker: grep
