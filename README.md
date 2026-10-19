@@ -20,16 +20,17 @@ git clone <this-repo-url> ~/.dotfiles/nvim-config
 It installs what's missing and skips the rest, so it's safe to re-run:
 
 - **Tools:** git, make, a C compiler, curl, unzip, tar, `rg`, `fd`, Node + npm and Python 3, through dnf, apt, pacman or Homebrew (Xcode command line tools on macOS).
+- **mise tools, when [mise](https://mise.jdx.dev) is installed:** a JDK for `jdtls` (Temurin 21), `fd` and `rg`, from [`mise/nvim.toml`](mise/nvim.toml). It's linked to `~/.config/mise/conf.d/nvim.toml`, so it sits next to your global mise config. Without mise, `fd` and `rg` come from the package manager and the JDK is up to you.
 - **Neovim ≥ 0.12.1:** Homebrew/pacman on macOS and Arch; elsewhere the official release build in `/opt/nvim`, since Fedora's and Debian's packages are too old.
-- **npm formatters:** the confirmed ones from [Global npm packages](#global-npm-packages).
+- **npm formatters:** the confirmed ones from [Global npm packages](#global-npm-packages), listed in [`mise/default-npm-packages`](mise/default-npm-packages). That file is linked to `~/.default-npm-packages`, so every Node version mise installs later gets them too; global npm packages otherwise stay behind with the old version.
 - **`~/.config/nvim`:** linked to the clone. An existing config is moved to `nvim.bak` first.
 - **Plugins and Mason tools:** installed headlessly. LSP servers follow on the first real start.
 
 When a new Neovim comes out, `install.sh --update` updates it where it was installed (the
-release build in `/opt/nvim`, or Homebrew), then the plugins and Mason tools. Commit the
+release build in `/opt/nvim`, or Homebrew), then the mise tools, plugins and Mason tools. Commit the
 changed `lazy-lock.json` afterwards so other machines get the same plugin versions.
 
-Not covered: Windows, a Nerd Font, and the per-language toolchains (JDK, LaTeX, Racket, SBCL, …). For those, and for doing it by hand, see the sections below.
+Not covered: Windows, a Nerd Font, and the per-language toolchains (LaTeX, Racket, SBCL, …, and the JDK without mise). For those, and for doing it by hand, see the sections below.
 
 ---
 
@@ -53,7 +54,7 @@ Optional, only needed if you actually use these filetypes:
 
 | Tool                                                              | Used for                                                                                                                                     |
 | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A JDK** (e.g. Temurin 17+)                                      | `jdtls` (Java LSP)                                                                                                                           |
+| **A JDK** (Temurin 21+; `install.sh` gets it through mise)        | `jdtls` (Java LSP)                                                                                                                           |
 | **A LaTeX distribution** + `latexmk`                              | `texlab` LSP, which also builds `.tex` on save. macOS: BasicTeX or MacTeX (MiKTeX's macOS build is stuck at 22.1, Intel-only). Windows: MiKTeX |
 | **clang-format**                                                  | C formatting (usually ships with LLVM/clang)                                                                                                 |
 | **Racket**                                                        | `racket_langserver`                                                                                                                          |
@@ -174,7 +175,7 @@ brew install neovim ripgrep fd node python@3.12 openjdk make
 brew install --cask mactex-no-gui   # LaTeX (full MacTeX also works, just bigger)
 ```
 
-Link the JDK if `jdtls` can't find it:
+Link the JDK if `jdtls` can't find it (not needed when it comes from mise, which sets `JAVA_HOME`):
 
 ```bash
 sudo ln -sfn $(brew --prefix openjdk)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
