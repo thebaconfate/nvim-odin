@@ -2,12 +2,13 @@
 # Sets this config up on macOS or Linux: the tools it needs, a recent enough Neovim, the npm
 # formatters Mason doesn't cover, the ~/.config/nvim link, and the plugins and Mason tools, so
 # the first real `nvim` starts ready. Safe to re-run: anything already in place is skipped.
-# Language toolchains (JDK, LaTeX, Racket, SBCL, ...) are left to the README: they're big and
+# Where mise is installed, it brings the JDK for jdtls, fd and ripgrep (mise/nvim.toml).
+# Other language toolchains (LaTeX, Racket, SBCL, ...) are left to the README: they're big and
 # only needed per filetype. Windows isn't covered either; see the README.
 #
 #   ./install.sh                     install what's missing
-#   ./install.sh --update            update Neovim to its latest release, then the plugins and
-#                                    Mason tools (nothing else)
+#   ./install.sh --update            update Neovim to its latest release, then the mise tools,
+#                                    plugins and Mason tools (nothing else)
 #   ./install.sh --dry-run           only show what would happen; combines with --update
 
 set -euo pipefail
@@ -62,6 +63,23 @@ version_at_least() {
         ((${have[i]:-0} < ${want[i]:-0})) && return 1
     done
     return 0
+}
+
+# link <file in this repo> <destination>: a real file already there is moved aside, never
+# overwritten; an existing link to somewhere else is just re-pointed
+link() {
+    local src="$1" dest="$2"
+    if [[ -L "$dest" && "$(readlink "$dest")" == "$src" ]]; then
+        echo "$dest: already linked"
+        return
+    fi
+    if [[ -e "$dest" && ! -L "$dest" ]]; then
+        echo "$dest: moving the existing file to $dest.bak"
+        run mv "$dest" "$dest.bak"
+    fi
+    echo "$dest: linking to $src"
+    run mkdir -p "$(dirname "$dest")"
+    run ln -sfn "$src" "$dest"
 }
 
 # The official release build, unpacked to /opt/nvim. Installs use it on Fedora and Debian;
@@ -127,6 +145,11 @@ update() {
         echo "neovim: $nvim_path comes from your package manager; update it there (Arch: pacman -Syu)"
     fi
     hash -r
+
+    if command -v mise >/dev/null 2>&1; then
+        echo "mise tools: upgrading java, fd and ripgrep"
+        run mise upgrade java fd ripgrep
+    fi
 
     # Lazy! sync moves plugins past the lockfile to their latest versions, and records them in
     # lazy-lock.json: commit that so the other machines get the same versions
@@ -202,7 +225,26 @@ tool "C compiler"  "cc|gcc|clang"   "gcc gcc-c++"        build-essential      ba
 tool curl          curl             curl                 curl                 curl                curl
 tool unzip         unzip            unzip                unzip                unzip               unzip
 tool tar           tar              tar                  tar                  tar                 gnu-tar
-tool ripgrep       rg               ripgrep              ripgrep              ripgrep             ripgrep
+
+# 1b. mise, when it's installed: the JDK for jdtls, fd and ripgrep at the same versions on
+#     macOS and Linux, without sudo. mise/nvim.toml is linked in as an extra global config,
+#     next to the dotfiles' own. mise/default-npm-packages gives every Node that mise installs
+#     from now on the npm formatters; the Node you have now gets them in step 3. This comes
+#     before the Mason step, so jdtls finds Java there.
+if command -v mise >/dev/null 2>&1; then
+    link "$REPO/mise/nvim.toml" "${XDG_CONFIG_HOME:-$HOME/.config}/mise/conf.d/nvim.toml"
+    link "$REPO/mise/default-npm-packages" "$HOME/.default-npm-packages"
+    echo "mise: installing java, fd and ripgrep"
+    run mise install
+    # This script runs without `mise activate`, so it finds them through the shims
+    export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH"
+    hash -r
+else
+    echo "mise: not installed, so fd and ripgrep come from $PM, and the JDK by hand (see the README)"
+fi
+
+# Already there when mise installed them; the package manager is the fallback
+tool ripgrep      rg               ripgrep              ripgrep              ripgrep             ripgrep
 # Debian and Ubuntu install fd as `fdfind`; the picker looks for both names.
 tool fd            "fd|fdfind"      fd-find              fd-find              fd                  fd
 tool "node + npm"  npm              "nodejs npm"         "nodejs npm"         "nodejs npm"        node
@@ -234,9 +276,13 @@ else
 fi
 
 # 3. npm formatters conform uses that Mason doesn't cover: prettier only finds the astro
-#    plugin when both are installed globally. (The README lists more npm packages that may be
-#    needed; those are unconfirmed, so they're left out here.)
-npm_packages=(prettier @fsouza/prettierd prettier-plugin-astro)
+#    plugin when both are installed globally. The list is mise/default-npm-packages, which
+#    mise also reads for every Node it installs later. (The README lists more npm packages
+#    that may be needed; those are unconfirmed, so they're left out here.)
+npm_packages=()
+while IFS= read -r package; do
+    [[ -n "$package" ]] && npm_packages+=("$package")
+done <"$REPO/mise/default-npm-packages"
 if ! command -v npm >/dev/null 2>&1; then
     echo "npm formatters: npm isn't installed yet, so would install ${npm_packages[*]} after it"
 else
@@ -297,4 +343,4 @@ fi
 
 echo
 echo "Done. Still by hand: a Nerd Font in your terminal, and any language toolchains you need"
-echo "(JDK, LaTeX, Racket, ...) from the README."
+echo "(LaTeX, Racket, ...; the JDK too without mise) from the README."
