@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Sets this config up on macOS or Linux: the tools it needs, a recent enough Neovim, the npm
-# formatters Mason doesn't cover, the ~/.config/nvim link, and the plugins and Mason tools, so
-# the first real `nvim` starts ready. Safe to re-run: anything already in place is skipped.
-# Language toolchains (JDK, LaTeX, Racket, SBCL, ...) are left to the README: they're big and
+# formatters Mason doesn't cover, the ~/.config/nvim link, Neovim as git's editor and merge
+# tool, and the plugins and Mason tools, so the first real `nvim` starts ready. Safe to
+# re-run: anything already in place is skipped.
+# Where mise is installed, it brings the JDK for jdtls, fd and ripgrep (mise/nvim.toml).
+# Other language toolchains (LaTeX, Racket, SBCL, ...) are left to the README: they're big and
 # only needed per filetype. Windows isn't covered either; see the README.
 #
 #   ./install.sh                     install what's missing
-#   ./install.sh --update            update Neovim to its latest release, then the plugins and
-#                                    Mason tools (nothing else)
+#   ./install.sh --update            update Neovim to its latest release, then the mise tools,
+#                                    plugins and Mason tools (nothing else), rebuilding Mason's
+#                                    Python tools if mise's Python has moved to a new minor
 #   ./install.sh --dry-run           only show what would happen; combines with --update
 
 set -euo pipefail
@@ -28,6 +31,19 @@ done
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 NVIM_MIN="0.12.1"
+MASON="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason"
+# For the plugin and Mason steps. wakatime is kept off for these runs: it would prompt for an
+# API key and log the install as coding time.
+headless=(nvim --headless --cmd "let g:loaded_wakatime = 1")
+
+# Run from this checkout, with tools resolved through mise's shims: they follow the current
+# directory, while the PATH `mise activate` set up follows the one you started in. So a
+# project's pinned versions (a python 3.12 in a work repo, say) don't leak in, above all into
+# the python3 that Mason builds its Python tools on.
+cd "$REPO"
+if command -v mise >/dev/null 2>&1; then
+    export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/mise/shims:$PATH"
+fi
 
 run() {
     if ((DRY_RUN)); then
@@ -60,6 +76,47 @@ version_at_least() {
         ((${have[i]:-0} < ${want[i]:-0})) && return 1
     done
     return 0
+}
+
+# link <file in this repo> <destination>: a real file already there is moved aside, never
+# overwritten; an existing link to somewhere else is just re-pointed
+link() {
+    local src="$1" dest="$2"
+    if [[ -L "$dest" && "$(readlink "$dest")" == "$src" ]]; then
+        echo "$dest: already linked"
+        return
+    fi
+    if [[ -e "$dest" && ! -L "$dest" ]]; then
+        echo "$dest: moving the existing file to $dest.bak"
+        run mv "$dest" "$dest.bak"
+    fi
+    echo "$dest: linking to $src"
+    run mkdir -p "$(dirname "$dest")"
+    run ln -sfn "$src" "$dest"
+}
+
+# Mason's Python tools are venvs on whichever python3 was current when they were installed.
+# After a Python minor bump in mise they stay on the old one, and break once it's removed:
+# rebuild the ones on another minor version than the current python3.
+rebuild_stale_python_tools() {
+    local want cfg have
+    local -a stale=()
+    want="$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null)" || return 0
+    for cfg in "$MASON"/packages/*/venv/pyvenv.cfg; do
+        [[ -f "$cfg" ]] || continue
+        have="$(sed -nE 's/^version = ([0-9]+\.[0-9]+).*/\1/p' "$cfg")"
+        if [[ -n "$have" && "$have" != "$want" ]]; then
+            stale+=("$(basename "$(dirname "$(dirname "$cfg")")")")
+        fi
+    done
+    if ((${#stale[@]} == 0)); then
+        echo "mason python tools: all on Python $want"
+        return 0
+    fi
+    echo "mason python tools: rebuilding ${stale[*]} on Python $want"
+    # Headless, :MasonInstall waits until the installs are done
+    run "${headless[@]}" "+MasonUninstall ${stale[*]}" "+MasonInstall ${stale[*]}" +qa ||
+        echo "    rebuilding failed; open nvim and run :MasonInstall ${stale[*]}"
 }
 
 # The official release build, unpacked to /opt/nvim. Installs use it on Fedora and Debian;
@@ -126,12 +183,17 @@ update() {
     fi
     hash -r
 
+    if command -v mise >/dev/null 2>&1; then
+        echo "mise tools: upgrading java, fd and ripgrep"
+        run mise upgrade java fd ripgrep
+    fi
+
     # Lazy! sync moves plugins past the lockfile to their latest versions, and records them in
     # lazy-lock.json: commit that so the other machines get the same versions
-    local headless=(nvim --headless --cmd "let g:loaded_wakatime = 1")
     echo "plugins: updating"
     run "${headless[@]}" "+Lazy! sync" +qa
     echo
+    rebuild_stale_python_tools
     echo "mason tools: updating"
     run "${headless[@]}" "+Lazy! load mason-tool-installer.nvim" "+MasonToolsUpdateSync" +qa ||
         echo "    some Mason tools failed; open nvim and run :Mason to see which"
@@ -200,7 +262,25 @@ tool "C compiler"  "cc|gcc|clang"   "gcc gcc-c++"        build-essential      ba
 tool curl          curl             curl                 curl                 curl                curl
 tool unzip         unzip            unzip                unzip                unzip               unzip
 tool tar           tar              tar                  tar                  tar                 gnu-tar
-tool ripgrep       rg               ripgrep              ripgrep              ripgrep             ripgrep
+
+# 1b. mise, when it's installed: the JDK for jdtls, fd and ripgrep at the same versions on
+#     macOS and Linux, without sudo. mise/nvim.toml is linked in as an extra global config,
+#     next to the dotfiles' own. mise/default-npm-packages gives every Node that mise installs
+#     from now on the npm formatters; the Node you have now gets them in step 3. This comes
+#     before the Mason step, so jdtls finds Java there.
+if command -v mise >/dev/null 2>&1; then
+    link "$REPO/mise/nvim.toml" "${XDG_CONFIG_HOME:-$HOME/.config}/mise/conf.d/nvim.toml"
+    link "$REPO/mise/default-npm-packages" "$HOME/.default-npm-packages"
+    echo "mise: installing java, fd and ripgrep"
+    run mise install
+    # Found through the shims on PATH (top of this script)
+    hash -r
+else
+    echo "mise: not installed, so fd and ripgrep come from $PM, and the JDK by hand (see the README)"
+fi
+
+# Already there when mise installed them; the package manager is the fallback
+tool ripgrep      rg               ripgrep              ripgrep              ripgrep             ripgrep
 # Debian and Ubuntu install fd as `fdfind`; the picker looks for both names.
 tool fd            "fd|fdfind"      fd-find              fd-find              fd                  fd
 tool "node + npm"  npm              "nodejs npm"         "nodejs npm"         "nodejs npm"        node
@@ -232,9 +312,13 @@ else
 fi
 
 # 3. npm formatters conform uses that Mason doesn't cover: prettier only finds the astro
-#    plugin when both are installed globally. (The README lists more npm packages that may be
-#    needed; those are unconfirmed, so they're left out here.)
-npm_packages=(prettier @fsouza/prettierd prettier-plugin-astro)
+#    plugin when both are installed globally. The list is mise/default-npm-packages, which
+#    mise also reads for every Node it installs later. (The README lists more npm packages
+#    that may be needed; those are unconfirmed, so they're left out here.)
+npm_packages=()
+while IFS= read -r package; do
+    [[ -n "$package" ]] && npm_packages+=("$package")
+done <"$REPO/mise/default-npm-packages"
 if ! command -v npm >/dev/null 2>&1; then
     echo "npm formatters: npm isn't installed yet, so would install ${npm_packages[*]} after it"
 else
@@ -275,18 +359,36 @@ else
     run ln -s "$REPO" "$CONFIG"
 fi
 
+# 4b. Neovim as git's editor and merge tool (git's built-in nvimdiff). Replaces nothing set, or
+#     the vim defaults the dotfiles' bootstrap.sh sets; any other choice of yours stays.
+# git_to_nvim <key> <vim value> <neovim value>
+git_to_nvim() {
+    local current
+    current="$(git config --global --get "$1" || true)"
+    if [[ "$current" == "$3" ]]; then
+        echo "git $1: already $3"
+    elif [[ -z "$current" || "$current" == "$2" ]]; then
+        echo "git $1: ${current:-unset} -> $3"
+        run git config --global "$1" "$3"
+    else
+        echo "git $1: keeping $current"
+    fi
+}
+git_to_nvim core.editor vim nvim
+git_to_nvim merge.tool vimdiff nvimdiff
+
 # 5. Plugins and Mason tools, headless. `Lazy! install` only adds missing plugins, at the
 #    lockfile's versions, so re-running never rolls back plugins you've updated since.
-#    LSP servers install on the first real start (mason-lspconfig). wakatime is kept off for
-#    these runs: it would prompt for an API key and log the install as coding time.
+#    LSP servers install on the first real start (mason-lspconfig). Python tools built on
+#    an older Python are rebuilt first (rebuild_stale_python_tools above).
 current="$(nvim_version || true)"
 if ((DRY_RUN)) || [[ -z "$current" ]] || ! version_at_least "$current" "$NVIM_MIN"; then
     echo "plugins + mason tools: would install them headlessly (needs Neovim >= $NVIM_MIN)"
 else
-    headless=(nvim --headless --cmd "let g:loaded_wakatime = 1")
     echo "plugins: installing what's missing"
     "${headless[@]}" "+Lazy! install" +qa
     echo
+    rebuild_stale_python_tools
     echo "mason tools: installing (formatters and jdtls; can take a few minutes)"
     "${headless[@]}" "+Lazy! load mason-tool-installer.nvim" "+MasonToolsInstallSync" +qa ||
         echo "    some Mason tools failed; open nvim and run :Mason to see which"
@@ -295,4 +397,4 @@ fi
 
 echo
 echo "Done. Still by hand: a Nerd Font in your terminal, and any language toolchains you need"
-echo "(JDK, LaTeX, Racket, ...) from the README."
+echo "(LaTeX, Racket, ...; the JDK too without mise) from the README."
