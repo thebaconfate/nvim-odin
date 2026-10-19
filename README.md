@@ -30,6 +30,11 @@ When a new Neovim comes out, `install.sh --update` updates it where it was insta
 release build in `/opt/nvim`, or Homebrew), then the mise tools, plugins and Mason tools. Commit the
 changed `lazy-lock.json` afterwards so other machines get the same plugin versions.
 
+Mason's Python tools (black, isort, debugpy, pyrefly, …) are venvs on the `python3` that was
+current when they were installed. Both `install.sh` and `--update` rebuild the ones on another
+minor version than mise's global Python, so after bumping it, run `install.sh --update`. The
+script runs from this checkout, so a work repo's pinned Python doesn't count.
+
 Not covered: Windows, a Nerd Font, and the per-language toolchains (LaTeX, Racket, SBCL, …, and the JDK without mise). For those, and for doing it by hand, see the sections below.
 
 ---
