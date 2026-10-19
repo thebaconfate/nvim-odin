@@ -47,6 +47,16 @@ local function venv_python()
     end
 end
 
+-- `python` if its venv has debugpy installed. debugpy's speedups are compiled for one Python
+-- version, so Mason's copy (on the global Python) falls back to its slow pure-Python tracer
+-- on a venv with another version; the venv's own debugpy always matches it.
+local function with_debugpy(python)
+    local venv = python and vim.fs.dirname(vim.fs.dirname(python))
+    if venv and vim.fn.glob(venv .. "/lib/python*/site-packages/debugpy", true, true)[1] then
+        return python
+    end
+end
+
 -- `call("dap", "step_over")` -> a function that requires the module only when pressed,
 -- like pick() in snacks.lua, so the keys table stays one line per mapping.
 local function call(module, fn)
@@ -104,8 +114,9 @@ return {
             end, configs)
         end
 
-        -- debugpy itself runs from Mason, so projects don't need it installed; the program
-        -- being debugged runs on the project's venv interpreter (venv_python above).
+        -- debugpy runs from the project's venv when it has it (with_debugpy above), and from
+        -- Mason otherwise, so projects don't need it installed; the program being debugged
+        -- runs on the project's venv interpreter (venv_python above).
         local dap_python = require("dap-python")
         dap_python.resolve_python = venv_python
         dap_python.setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python")
@@ -117,6 +128,11 @@ return {
         local python_adapter = dap.adapters.python
         dap.adapters.python = function(cb, config)
             python_adapter(function(adapter)
+                -- Only a launched adapter has a command; attach connects to a running server
+                if adapter.type == "executable" then
+                    local python = type(config.python) == "string" and config.python or venv_python()
+                    adapter.command = with_debugpy(python) or adapter.command
+                end
                 local enrich = adapter.enrich_config
                 if enrich then
                     adapter.enrich_config = function(cfg, on_config)
