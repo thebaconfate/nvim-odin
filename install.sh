@@ -32,9 +32,8 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 NVIM_MIN="0.12.1"
 MASON="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/mason"
-# For the plugin and Mason steps. wakatime is kept off for these runs: it would prompt for an
-# API key and log the install as coding time.
-headless=(nvim --headless --cmd "let g:loaded_wakatime = 1")
+# For the plugin and Mason steps
+headless=(nvim --headless)
 
 # Run from this checkout, with tools resolved through mise's shims: they follow the current
 # directory, while the PATH `mise activate` set up follows the one you started in. So a
