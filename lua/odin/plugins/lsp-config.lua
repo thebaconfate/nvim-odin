@@ -85,7 +85,7 @@ return {
                 end
 
                 -- Inlay hints are configured per-server (see after/lsp/vtsls.lua) but are off by
-                -- default: Neovim re-requests them after every keystroke, and in ~/dev/qargo/frontend
+                -- default: Neovim re-requests them after every keystroke, and in a large TS project
                 -- tsc/vtsls take 1-2s per request, queueing in front of completions (measured typing
                 -- a line there: completion median 75-170ms with hints, 41-50ms without).
                 -- Show them per buffer when wanted.
@@ -147,8 +147,7 @@ return {
         -- EXPERIMENT (branch try-tsc): TypeScript 7's native `tsc --lsp` in projects on
         -- TS 7+, vtsls everywhere else (lua/odin/typescript.lua decides). Enabled outside
         -- `servers` because it is not a Mason package: it runs the project's own compiler.
-        -- Measured on ~/dev/qargo/frontend (TS 7.0.2, vtsls bundles 5.9.3), 3 runs on
-        -- MetricOverrideTableField.tsx:
+        -- Measured on a large TS 7.0.2 project (vtsls bundles 5.9.3), 3 runs on one file:
         --   first non-empty completion after open   vtsls 6.4-7.1s    tsc 0.7-1.0s
         --   hover once loaded                       vtsls ~460ms      tsc ~150ms
         -- Same completion items, same capabilities; tsc also advertises willRenameFiles.

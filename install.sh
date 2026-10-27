@@ -69,7 +69,9 @@ nvim_version() {
 # version_at_least <version> <minimum>
 version_at_least() {
     local IFS=.
-    local -a have=($1) want=($2)
+    local -a have want
+    read -ra have <<<"$1"
+    read -ra want <<<"$2"
     local i
     for i in 0 1 2; do
         ((${have[i]:-0} > ${want[i]:-0})) && return 0

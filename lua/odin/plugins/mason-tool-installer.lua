@@ -21,6 +21,9 @@ return {
             -- jdtls is driven by nvim-jdtls rather than mason-lspconfig, so it has
             -- to be requested here instead of via the servers list.
             "jdtls",
+            -- Python debug adapter for nvim-dap (see nvim-dap.lua). Runs from Mason so
+            -- projects do not need debugpy in their own venv.
+            "debugpy",
             -- NOTE: not in the Mason registry; these come from the system or the
             -- language toolchain:
             --   astyle  (java)    -> brew install astyle, or switch conform's java
