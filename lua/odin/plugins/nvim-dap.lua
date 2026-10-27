@@ -1,15 +1,16 @@
 -- EXPERIMENT (branch try-dap): debugging via nvim-dap.
 --
 -- Configurations come from the nearest .vscode/launch.json above the current file, so
--- the debug configs a team keeps for VS Code work as-is (~/dev/qargo/backend/projects/tms
--- ships ~30: Django runserver, pytest on the current file, the pubsub pullers, attach).
+-- the debug configs a team keeps for VS Code work as-is (a dev server, pytest on the
+-- current file, background workers, attach).
+-- Its compounds are in the same picker and start each of their configs as a session.
 --
 -- Keys live under <leader>b ("breakpoint"): <leader>d is delete-to-void in remap.lua, and
 -- F-keys need fn on a Mac keyboard.
 --
 -- No dap-python test_method key: it builds its own config without the launch.json
--- envFile/cwd/PYTHONPATH, so Django tests in tms start without their environment. Use
--- <leader>bc -> "Test current open file against local database" instead.
+-- envFile/cwd/PYTHONPATH, so tests that need that environment start without it. Use
+-- <leader>bc and pick the launch.json config that runs the current test file instead.
 
 -- The nearest folder above `path` with a .vscode/launch.json, i.e. the VS Code workspace.
 local function workspace_for(path)
@@ -17,9 +18,29 @@ local function workspace_for(path)
     return found and vim.fs.dirname(vim.fs.dirname(found))
 end
 
+-- VS Code's `compounds` (several configs started together, e.g. a server and its workers), which
+-- nvim-dap's launch.json reader skips, as configs for the `compound` adapter below.
+local function compounds(path, configs)
+    local ok, data = pcall(vim.json.decode, table.concat(vim.fn.readfile(path), "\n"), { skip_comments = true })
+    if not ok then
+        return {}
+    end
+    local by_name = {}
+    for _, config in ipairs(configs) do
+        by_name[config.name] = config
+    end
+    return vim.tbl_map(function(compound)
+        local members = {}
+        for _, name in ipairs(compound.configurations) do
+            table.insert(members, by_name[name])
+        end
+        return { type = "compound", request = "launch", name = compound.name, members = members }
+    end, data.compounds or {})
+end
+
 -- Replace VS Code's ${workspaceFolder}/${workspaceRoot} in every string of a config.
--- nvim-dap would expand them to the cwd, which is wrong when nvim was started in the
--- repo root (~/dev/qargo/backend) but launch.json lives in projects/tms.
+-- nvim-dap would expand them to the cwd, which is wrong when nvim was started in a
+-- monorepo root but launch.json lives in a project below it.
 local function substitute_workspace(value, root)
     if type(value) == "string" then
         return (value:gsub("%${workspaceFolder}", root):gsub("%${workspaceRoot}", root))
@@ -87,6 +108,13 @@ return {
         { "<leader>br", call("dap", "run_to_cursor"), desc = "Debug: run to cursor" },
         { "<leader>bl", call("dap", "run_last"), desc = "Debug: rerun last config" },
         { "<leader>bq", call("dap", "terminate"), desc = "Debug: stop" },
+        {
+            "<leader>bQ",
+            function()
+                require("dap").terminate({ all = true, hierarchy = true })
+            end,
+            desc = "Debug: stop all sessions",
+        },
         { "<leader>bu", call("dap-view", "toggle"), desc = "Debug: toggle panel" },
         { "<leader>bw", call("dap-view", "add_expr"), desc = "Debug: watch word under cursor" },
     },
@@ -105,13 +133,14 @@ return {
                 vim.notify("Can't read " .. root .. "/.vscode/launch.json:\n" .. configs, vim.log.levels.WARN)
                 return {}
             end
-            return vim.tbl_map(function(config)
+            configs = vim.tbl_map(function(config)
                 config = substitute_workspace(config, root)
-                -- VS Code runs from the workspace folder unless told otherwise; the tms
-                -- pytest configs rely on it (`-c setup.cfg`, PYTHONPATH=./src).
+                -- VS Code runs from the workspace folder unless told otherwise; configs with
+                -- relative paths rely on it (`-c setup.cfg`, PYTHONPATH=./src).
                 config.cwd = config.cwd or root
                 return config
             end, configs)
+            return vim.list_extend(compounds(root .. "/.vscode/launch.json", configs), configs)
         end
 
         -- debugpy runs from the project's venv when it has it (with_debugpy above), and from
@@ -122,9 +151,9 @@ return {
         dap_python.setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python")
 
         -- nvim-dap-python reads `envFile` (debugpy does not), but lets the file override the
-        -- config's own `env`. VS Code does the opposite, and several tms configs rely on it:
-        -- the pubsub pullers set PUBSUB_PROJECT / PUBSUB_EMULATOR_HOST / ... over the values
-        -- in dev-venv.env. Re-apply `env` on top so the config wins, as in VS Code.
+        -- config's own `env`. VS Code does the opposite, and configs rely on it to override
+        -- single values from a shared env file. Re-apply `env` on top so the config wins, as
+        -- in VS Code.
         local python_adapter = dap.adapters.python
         dap.adapters.python = function(cb, config)
             python_adapter(function(adapter)
@@ -148,8 +177,22 @@ return {
         end
         dap.adapters.debugpy = dap.adapters.python
 
+        -- Starts each member as its own session instead of starting a debugger: `cb` is never
+        -- called, so the compound itself gets no session.
+        dap.adapters.compound = function(_, config)
+            for _, member in ipairs(config.members) do
+                dap.run(member)
+            end
+        end
+
         -- The panel opens when a session starts and closes when it ends.
-        require("dap-view").setup({ auto_toggle = true })
+        require("dap-view").setup({
+            auto_toggle = true,
+            -- The defaults plus Sessions (K, only in the panel): compounds run several at once.
+            winbar = {
+                sections = { "watches", "scopes", "exceptions", "breakpoints", "threads", "repl", "sessions" },
+            },
+        })
 
         vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DiagnosticError" })
         vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DiagnosticWarn" })
