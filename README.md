@@ -261,7 +261,6 @@ git clone <this-repo-url> $env:LOCALAPPDATA\nvim
 3. Run `:Mason` and confirm the LSP servers/tools listed in `lua/odin/plugins/lsp-config.lua` installed successfully. If something fails (usually Node/Python/Java not on PATH), fix the underlying toolchain and re-run `:MasonInstall <name>`.
 4. Treesitter parsers install automatically per-filetype the first time you open a matching file (see the `FileType` autocommand in `lua/odin/plugins/nvim-treesitter.lua`) — just open a file of that type once.
 5. Install and select a **Nerd Font** in your terminal emulator's settings so icons render correctly.
-6. `vim-wakatime` will prompt you for an API key on first use if you have a [WakaTime](https://wakatime.com/) account; it writes it to `~/.wakatime.cfg`, not into this repo.
 
 ---
 
