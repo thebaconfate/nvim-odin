@@ -43,20 +43,19 @@ return {
             -- vtsls wraps the same tsserver but reimplements the VS Code extension
             -- layer, so inlay hints / organizeImports / "move to file" actually work.
             "vtsls",
-            -- oxlint (oxc) is the linter in the qargo frontend. lspconfig prefers the
-            -- project-local node_modules/.bin/oxlint and roots on .oxlintrc.json, so it
-            -- stays quiet in projects that do not use it.
+            -- oxlint (oxc): lspconfig prefers the project-local node_modules/.bin/oxlint
+            -- and roots on .oxlintrc.json, so it stays quiet in projects that do not use it.
             "oxlint",
             "html",
             "cssls",
             "yamlls",
             "texlab",
             -- EXPERIMENT (branch try-pyrefly): pyrefly instead of basedpyright.
-            -- Measured on ~/dev/qargo/backend/projects/tms, first completion in a file:
+            -- Measured on a large Django project, first completion in a file:
             --   basedpyright 1353ms -> 219ms -> 2ms      pyrefly 318ms -> 1ms -> 1ms
             -- Same capabilities; pyrefly returns 16 fewer items, all dunders.
             -- pyrefly does NOT read pyrightconfig.json, so the Django false-positive
-            -- suppressions live in a local projects/tms/pyrefly.toml.
+            -- suppressions live in a local pyrefly.toml.
             -- Swap these two lines to go back.
             -- "basedpyright",
             "pyrefly",
@@ -102,7 +101,7 @@ return {
                 end
 
                 -- Inlay hints are configured per-server (see after/lsp/vtsls.lua) but are off by
-                -- default: Neovim re-requests them after every keystroke, and in ~/dev/qargo/frontend
+                -- default: Neovim re-requests them after every keystroke, and in a large TS project
                 -- tsc/vtsls take 1-2s per request, queueing in front of completions (measured typing
                 -- a line there: completion median 75-170ms with hints, 41-50ms without).
                 -- Show them per buffer when wanted.
@@ -155,8 +154,7 @@ return {
         -- EXPERIMENT (branch try-tsc): TypeScript 7's native `tsc --lsp` in projects on
         -- TS 7+, vtsls everywhere else (lua/odin/typescript.lua decides). Enabled outside
         -- `servers` because it is not a Mason package: it runs the project's own compiler.
-        -- Measured on ~/dev/qargo/frontend (TS 7.0.2, vtsls bundles 5.9.3), 3 runs on
-        -- MetricOverrideTableField.tsx:
+        -- Measured on a large TS 7.0.2 project (vtsls bundles 5.9.3), 3 runs on one file:
         --   first non-empty completion after open   vtsls 6.4-7.1s    tsc 0.7-1.0s
         --   hover once loaded                       vtsls ~460ms      tsc ~150ms
         -- Same completion items, same capabilities; tsc also advertises willRenameFiles.
