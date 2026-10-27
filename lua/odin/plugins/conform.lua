@@ -20,8 +20,8 @@ return {
         local js_config = { "oxfmt", "prettierd", "prettier", stop_after_first = true }
 
         -- Resolve a Python tool from the project's own virtualenv before falling back
-        -- to Mason/$PATH. ~/dev/qargo/backend pins black 24.4.2 in pyproject.toml, and a
-        -- newer black reformats differently - running the wrong one means fighting CI.
+        -- to Mason/$PATH. Projects pin their black version, and a newer black reformats
+        -- differently - running the wrong one means fighting CI.
         local function from_venv(tool)
             return function(_, ctx)
                 for dir in vim.fs.parents(ctx.filename) do
@@ -46,13 +46,11 @@ return {
                 -- below to go back to it.
                 -- python = { "ruff_format" },
                 --
-                -- ~/dev/qargo/backend formats with black (line-length 119, [tool.black]
-                -- in the REPO-ROOT pyproject.toml - black finds it via the .git dir, past
-                -- projects/tms/pyproject.toml which has no [tool.black]) and orders
-                -- imports with isort (profile=black, custom STDLIB/DJANGO/PYDANTIC/...
-                -- sections in setup.cfg). isort order is enforced in CI by the
-                -- flake8-isort plugin. isort runs first; profile=black keeps them in
-                -- agreement.
+                -- black reads [tool.black] from the REPO-ROOT pyproject.toml when nested
+                -- ones lack it (it finds the root via the .git dir). isort orders imports
+                -- (profile=black, sections in setup.cfg) and CI can enforce that order
+                -- through the flake8-isort plugin. isort runs first; profile=black keeps
+                -- them in agreement.
                 python = { "isort", "black" },
                 astro = prettier_config,
                 css = prettier_config,

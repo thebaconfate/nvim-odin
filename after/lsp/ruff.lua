@@ -33,8 +33,8 @@ local function project_linter(path)
 end
 
 return {
-    -- Stay out of projects that lint with flake8 and have no ruff config of their own
-    -- (e.g. ~/dev/qargo/backend). There ruff falls back to its defaults - several
+    -- Stay out of projects that lint with flake8 and have no ruff config of their own.
+    -- There ruff falls back to its defaults - several
     -- hundred rules - and flags thousands of things CI never checks, such as the F401
     -- re-exports flake8's per-file-ignores allow in __init__.py. Projects with a ruff
     -- config, or with no linter config at all, still get ruff.

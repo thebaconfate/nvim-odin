@@ -13,8 +13,8 @@ return {
             hover = true,      -- Enable hover documentation
             -- NOTE: conform has no YAML formatter, so format-on-save fell back to this
             -- server's prettier-based formatter and rewrote whole files ('x' -> "x",
-            -- `[ a ]` -> `[a]`, list re-indents). That would touch ~40% of the YAML in
-            -- ~/dev/qargo/backend. Off, so a one-line edit stays a one-line diff.
+            -- `[ a ]` -> `[a]`, list re-indents). In an existing repo that touches much of
+            -- the YAML. Off, so a one-line edit stays a one-line diff.
             format = { enable = false },
         },
     },
