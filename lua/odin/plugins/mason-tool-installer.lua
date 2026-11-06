@@ -6,12 +6,14 @@ return {
     cmd = { "MasonToolsInstall", "MasonToolsUpdate" },
     event = "VeryLazy",
     opts = {
-        ensure_installed = {
+        -- The LSP servers (lua/odin/lsp-servers.lua, lspconfig names, which this plugin maps to
+        -- Mason's) come first, so :MasonToolsUpdate upgrades them along with the rest.
+        -- ruff is one of them: python linting. ruff_format is currently parked in conform.lua
+        -- in favour of black/isort.
+        ensure_installed = vim.list_extend(vim.deepcopy(require("odin.lsp-servers")), {
             "stylua", -- lua
             "prettierd", -- ts/js/astro/css/html/markdown
             "prettier", -- fallback when prettierd is unavailable
-            "ruff", -- python: ruff LSP (linting). ruff_format is currently
-            --                  parked in conform.lua in favour of black/isort.
             "black", -- python formatter; projects with their own venv copy win
             "isort", -- python import sorting (see conform.lua)
             "clang-format", -- c
@@ -31,7 +33,7 @@ return {
             --   erlfmt  (erlang)  -> rebar3 / hex
             --   sbcl    (lisp)    -> brew install sbcl
             --   raco    (racket)  -> ships with DrRacket
-        },
+        }),
         run_on_start = false, -- Install on demand via :MasonToolsInstall, not every startup
     },
 }

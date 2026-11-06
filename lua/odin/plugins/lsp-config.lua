@@ -37,31 +37,8 @@ return {
             shell = get_shell(),
         })
 
-        local servers = {
-            "lua_ls",
-            "astro",
-            "vtsls",
-            "oxlint",
-            "html",
-            "cssls",
-            "yamlls",
-            "texlab",
-            "pyrefly",
-            "ruff",
-            "dockerls",
-            "docker_compose_language_service",
-            "jsonls",
-            "bashls",
-            "clangd",
-            "ltex_plus",
-            "marksman", -- markdown: cross-file links, headings, rename
-            -- "rust_analyzer",
-            -- "gopls",
-            -- "hls",
-            -- "erlangls",
-            -- "opencl_ls,"
-            -- "elixirls"
-        }
+        -- In lua/odin/lsp-servers.lua: mason-tool-installer.lua reads it too, to update them
+        local servers = require("odin.lsp-servers")
 
         require("mason-lspconfig").setup({
             ensure_installed = servers,
