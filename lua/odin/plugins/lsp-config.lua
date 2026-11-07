@@ -67,20 +67,25 @@ return {
                 -- a line there: completion median 75-170ms with hints, 41-50ms without).
                 -- Show them per buffer when wanted.
                 map("n", "<leader>vih", function()
-                    vim.lsp.inlay_hint.enable(
-                        not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }),
-                        { bufnr = ev.buf }
-                    )
+                    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }), { bufnr = ev.buf })
                 end, "LSP: toggle inlay hints")
 
                 -- Picker-backed variants of the built-in jumps (snacks.picker): these give a
                 -- picker instead of the quickfix list, which is why they override the
                 -- defaults. They take over the gr* keys rather than claiming new ones, so
                 -- built-in `gi` (resume insert where you last left it) stays available.
-                map("n", "gd", function() Snacks.picker.lsp_definitions() end, "LSP: definitions (picker)")
-                map("n", "gri", function() Snacks.picker.lsp_implementations() end, "LSP: implementations (picker)")
-                map("n", "grr", function() Snacks.picker.lsp_references() end, "LSP: references (picker)")
-                map("n", "<leader>vws", function() Snacks.picker.lsp_workspace_symbols() end, "LSP: workspace symbols (picker)")
+                map("n", "gd", function()
+                    Snacks.picker.lsp_definitions()
+                end, "LSP: definitions (picker)")
+                map("n", "gri", function()
+                    Snacks.picker.lsp_implementations()
+                end, "LSP: implementations (picker)")
+                map("n", "grr", function()
+                    Snacks.picker.lsp_references()
+                end, "LSP: references (picker)")
+                map("n", "<leader>vws", function()
+                    Snacks.picker.lsp_workspace_symbols()
+                end, "LSP: workspace symbols (picker)")
 
                 map("n", "gD", vim.lsp.buf.declaration, "LSP: go to declaration")
                 map("n", "<leader>vd", vim.diagnostic.open_float, "Diagnostics: show float")
@@ -98,7 +103,11 @@ return {
                         vim.notify("No diagnostic found on this line", vim.log.levels.WARN)
                         return
                     end
-                    local msg = vim.iter(diag):map(function(d) return d.message end):join("\n")
+                    local msg = vim.iter(diag)
+                        :map(function(d)
+                            return d.message
+                        end)
+                        :join("\n")
                     vim.fn.setreg("+", msg)
                     vim.notify("Diagnostic copied to clipboard")
                 end, "Diagnostics: copy line diagnostics to clipboard")

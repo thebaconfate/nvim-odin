@@ -75,6 +75,7 @@ return {
             formatters = {
                 black = { command = from_venv("black") },
                 isort = { command = from_venv("isort") },
+                ruff_format = { command = from_venv("ruff") },
                 oxfmt = {
                     -- Only run where the project actually uses oxfmt: conform's bundled
                     -- config anchors cwd to .oxfmtrc.json, and require_cwd makes a miss
