@@ -27,8 +27,9 @@ It installs what's missing and skips the rest, so it's safe to re-run:
 - **Plugins and Mason tools:** installed headlessly. LSP servers follow on the first real start.
 
 When a new Neovim comes out, `install.sh --update` updates it where it was installed (the
-release build in `/opt/nvim`, or Homebrew), then the mise tools, plugins and Mason tools. Commit the
-changed `lazy-lock.json` afterwards so other machines get the same plugin versions.
+release build in `/opt/nvim`, or Homebrew), then the mise tools, plugins and Mason tools.
+`lazy-lock.json` isn't committed: each machine keeps its own, and `:Lazy restore` rolls back to
+it after an update that breaks something.
 
 Mason's Python tools (black, isort, pyrefly, …) are venvs on the `python3` that was
 current when they were installed. Both `install.sh` and `--update` rebuild the ones on another
