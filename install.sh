@@ -191,7 +191,7 @@ update() {
     fi
 
     # Lazy! sync moves plugins past the lockfile to their latest versions, and records them in
-    # lazy-lock.json: commit that so the other machines get the same versions
+    # lazy-lock.json (gitignored: per machine; :Lazy restore goes back to it)
     echo "plugins: updating"
     run "${headless[@]}" "+Lazy! sync" +qa
     echo
@@ -199,10 +199,6 @@ update() {
     echo "mason tools: updating"
     run "${headless[@]}" "+Lazy! load mason-tool-installer.nvim" "+MasonToolsUpdateSync" +qa ||
         echo "    some Mason tools failed; open nvim and run :Mason to see which"
-    echo
-    if ! git -C "$REPO" diff --quiet -- lazy-lock.json; then
-        echo "lazy-lock.json changed: commit it to keep your other machines on the same plugin versions"
-    fi
 }
 
 if ((UPDATE)); then
