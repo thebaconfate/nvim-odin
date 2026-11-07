@@ -37,47 +37,8 @@ return {
             shell = get_shell(),
         })
 
-        local servers = {
-            "lua_ls",
-            "astro",
-            -- vtsls wraps the same tsserver but reimplements the VS Code extension
-            -- layer, so inlay hints / organizeImports / "move to file" actually work.
-            "vtsls",
-            -- oxlint (oxc): lspconfig prefers the project-local node_modules/.bin/oxlint
-            -- and roots on .oxlintrc.json, so it stays quiet in projects that do not use it.
-            "oxlint",
-            "html",
-            "cssls",
-            "yamlls",
-            "texlab",
-            -- EXPERIMENT (branch try-pyrefly): pyrefly instead of basedpyright.
-            -- Measured on a large Django project, first completion in a file:
-            --   basedpyright 1353ms -> 219ms -> 2ms      pyrefly 318ms -> 1ms -> 1ms
-            -- Same capabilities; pyrefly returns 16 fewer items, all dunders.
-            -- pyrefly does NOT read pyrightconfig.json, so the Django false-positive
-            -- suppressions live in a local pyrefly.toml.
-            -- Swap these two lines to go back.
-            -- "basedpyright",
-            "pyrefly",
-            -- Types and hover come from the Python type checker; ruff adds linting and fix-alls.
-            "ruff",
-            "dockerls",
-            "docker_compose_language_service",
-            "jsonls",
-            "bashls",
-            -- NOTE: Installation and updates of erlangls are required to be exectuted in bash, otherwise it won't succeed.
-            -- Simply run neovim in git bash or wsl bash if on windows
-            --
-            "clangd",
-            "ltex_plus",
-            "marksman", -- markdown: cross-file links, headings, rename
-            -- "rust_analyzer",
-            -- "gopls",
-            -- "hls",
-            -- "erlangls",
-            -- "opencl_ls,"
-            -- "elixirls"
-        }
+        -- In lua/odin/lsp-servers.lua: mason-tool-installer.lua reads it too, to update them
+        local servers = require("odin.lsp-servers")
 
         require("mason-lspconfig").setup({
             ensure_installed = servers,
