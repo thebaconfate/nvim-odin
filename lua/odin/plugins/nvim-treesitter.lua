@@ -30,7 +30,8 @@ return {
             callback = function(args)
                 local lang = vim.treesitter.language.get_lang(args.match)
                 if vim.list_contains(treesitter.get_available(), lang) then
-                    if not vim.list_contains(treesitter.get_installed(), lang)
+                    if
+                        not vim.list_contains(treesitter.get_installed(), lang)
                         and not vim.list_contains(pre_installed, lang)
                     then
                         treesitter.install(lang):wait()
@@ -38,7 +39,7 @@ return {
                     vim.treesitter.start(args.buf)
                 end
             end,
-            desc = "Enable nvim-treesitter and install parser if not installed"
+            desc = "Enable nvim-treesitter and install parser if not installed",
         })
     end,
 }

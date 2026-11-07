@@ -18,9 +18,14 @@ return {
                 end
 
                 local root = vim.fs.root(args.buf, {
-                    "settings.gradle", "settings.gradle.kts",
-                    "build.gradle", "build.gradle.kts",
-                    "pom.xml", "mvnw", "gradlew", ".git",
+                    "settings.gradle",
+                    "settings.gradle.kts",
+                    "build.gradle",
+                    "build.gradle.kts",
+                    "pom.xml",
+                    "mvnw",
+                    "gradlew",
+                    ".git",
                 })
                 if not root then
                     return
