@@ -14,6 +14,7 @@ return {
             "stylua", -- lua
             "prettierd", -- ts/js/astro/css/html/markdown
             "prettier", -- fallback when prettierd is unavailable
+            "eslint_d", -- ts/js in projects that format through ESLint (see conform.lua)
             "black", -- python formatter; projects with their own venv copy win
             "isort", -- python import sorting (see conform.lua)
             "clang-format", -- c
