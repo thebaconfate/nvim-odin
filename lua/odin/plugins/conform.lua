@@ -14,10 +14,13 @@ return {
     config = function()
         local prettier_config = { "prettierd", "prettier", stop_after_first = true }
         -- JS/TS only. oxfmt (the oxc formatter) is used by repos that ship an
-        -- .oxfmtrc.json; require_cwd below means it is skipped everywhere else and
-        -- prettier takes over. oxfmt does not handle css/html/markdown, so those
-        -- stay on prettier unconditionally.
-        local js_config = { "oxfmt", "prettierd", "prettier", stop_after_first = true }
+        -- .oxfmtrc.json; require_cwd below means it is skipped everywhere else.
+        -- Next, eslint_d covers projects whose Prettier options live inside the ESLint
+        -- config (eslint-plugin-prettier, e.g. the backend's data-fetcher-shaper):
+        -- plain prettier finds no .prettierrc there and rewraps at 80 columns.
+        -- Projects with neither fall through to prettier. oxfmt does not handle
+        -- css/html/markdown, so those stay on prettier unconditionally.
+        local js_config = { "oxfmt", "eslint_d", "prettierd", "prettier", stop_after_first = true }
 
         -- Resolve a Python tool from the project's own virtualenv before falling back
         -- to Mason/$PATH. Projects pin their black version, and a newer black reformats
@@ -81,6 +84,24 @@ return {
                     -- config anchors cwd to .oxfmtrc.json, and require_cwd makes a miss
                     -- skip the formatter instead of running it with the wrong settings.
                     -- The binary resolves from the project's node_modules/.bin.
+                    require_cwd = true,
+                },
+                eslint_d = {
+                    -- conform's bundled config anchors cwd to package.json, which every JS
+                    -- project has. Anchor to an ESLint config instead, so projects without
+                    -- ESLint skip it and fall through to prettier.
+                    cwd = require("conform.util").root_file({
+                        ".eslintrc",
+                        ".eslintrc.js",
+                        ".eslintrc.cjs",
+                        ".eslintrc.json",
+                        ".eslintrc.yaml",
+                        ".eslintrc.yml",
+                        "eslint.config.js",
+                        "eslint.config.mjs",
+                        "eslint.config.cjs",
+                        "eslint.config.ts",
+                    }),
                     require_cwd = true,
                 },
                 raco_fmt = {
