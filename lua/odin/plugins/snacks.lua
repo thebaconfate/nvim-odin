@@ -45,15 +45,6 @@ local function rainbow_guides()
     end
 end
 
-local function claude_code_split()
-    Snacks.terminal.toggle("claude", { win = { position = "right", width = 0.4 } })
-end
-
-local function claude_code_tab()
-    vim.cmd("tabnew")
-    Snacks.terminal.open("claude", { win = { position = "current" } })
-end
-
 local function hl_groups(prefix, names)
     return vim.tbl_map(function(name)
         return prefix .. name
@@ -62,7 +53,6 @@ end
 
 return {
     -- Only the picker and indent guides: snacks enables just the modules listed in opts.
-    -- (Snacks.terminal, for the Claude split, works without being listed.)
     "folke/snacks.nvim",
     -- Loaded at startup, as snacks asks: plugins that hook into it (todo-comments' picker
     -- source) only register if Snacks exists by the time they load.
@@ -98,8 +88,6 @@ return {
             end),
             desc = "Picker: grep prompt",
         },
-        { "<leader>cc", claude_code_split, desc = "Claude Code: toggle split" },
-        { "<leader>cC", claude_code_tab, desc = "Claude Code: full-screen tab" },
     },
     opts = {
         picker = {
