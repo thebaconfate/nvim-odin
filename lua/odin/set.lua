@@ -54,5 +54,21 @@ vim.api.nvim_create_autocmd("FileType", {
     desc = "Hard-wrap prose filetypes at 80 columns",
 })
 
+-- The terminal title says what this nvim is showing, for tmux to name the window by (see
+-- automatic-rename-format in .tmux.conf): "claude" while a Claude Code terminal is in
+-- front, otherwise "nvim", which is tmux's own name for it. Matched on the terminal's
+-- command, so it covers the snacks split/tab and a plain :terminal claude alike.
+vim.o.title = true
+vim.o.titlestring = "nvim"
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter", "TabEnter", "TermOpen" }, {
+    group = vim.api.nvim_create_augroup("odin_title", { clear = true }),
+    callback = function()
+        local claude = vim.bo.buftype == "terminal"
+            and vim.api.nvim_buf_get_name(0):match("^term://.*//%d+:claude") ~= nil
+        vim.o.titlestring = claude and "claude" or "nvim"
+    end,
+    desc = "Title the terminal claude while a Claude Code terminal is focused",
+})
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
